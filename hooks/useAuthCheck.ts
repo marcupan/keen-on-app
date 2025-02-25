@@ -7,8 +7,8 @@ export function useAuthCheck() {
   const router = useRouter();
 
   useEffect(() => {
-    // For demonstration, let's say we check localStorage
     const token = localStorage.getItem("authToken");
+
     if (!token) {
       router.replace("/login");
     }

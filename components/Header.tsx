@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function Header() {
   const router = useRouter();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -16,7 +17,9 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+
     setIsLoggedIn(false);
+
     router.push("/login");
   };
 

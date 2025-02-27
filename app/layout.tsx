@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import Header from "../components/Header";
-
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,19 +21,20 @@ export const metadata: Metadata = {
   description: "Language learning card generate web app",
 };
 
-type RootLayoutType = Readonly<{
+export default function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-}>;
-
-export default function RootLayout({ children }: RootLayoutType) {
+}) {
   return (
     <html lang="en">
-      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
       >
-        <Header />
-        <main className="container mx-auto px-4 py-8">{children}</main>
+        <Providers>
+          <Header />
+          <main className="container mx-auto px-4 py-8">{children}</main>
+        </Providers>
       </body>
     </html>
   );

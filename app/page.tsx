@@ -1,14 +1,7 @@
-"use client";
-
-import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  useAuthCheck(); // This will redirect if not logged in
+	redirect('/dashboard');
 
-  return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Welcome Home!</h1>
-      <p>You are logged in. Enjoy your content!</p>
-    </div>
-  );
+	return null;
 }

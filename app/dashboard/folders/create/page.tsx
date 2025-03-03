@@ -1,26 +1,16 @@
 'use client';
 
 import React from 'react';
-import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-type FolderForm = {
-	name: string;
-	description?: string;
-};
+import { useForm, useField } from '@tanstack/react-form';
 
 export default function CreateFolderPage() {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<FolderForm>();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation(
-		async (data: FolderForm) => {
+		async (data: { name: string; description?: string }) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders`,
 				{
@@ -32,64 +22,62 @@ export default function CreateFolderPage() {
 					body: JSON.stringify(data),
 				}
 			);
-			if (!res.ok) {
-				throw new Error('Error creating folder');
-			}
+			if (!res.ok) throw new Error('Error creating folder');
 			return res.json();
 		},
 		{
 			onSuccess: () => {
 				queryClient.invalidateQueries(['folders']);
-				router.push('/dashboard');
 			},
 		}
 	);
 
-	const onSubmit = (data: FolderForm) => {
-		mutation.mutate(data);
-	};
+	const {
+		Form,
+		meta: { canSubmit, isSubmitting },
+	} = useForm({
+		onSubmit: async (values) => {
+			await mutation.mutateAsync(values);
+			router.push('/dashboard');
+		},
+		defaultValues: {
+			name: '',
+			description: '',
+		},
+	});
+
+	function TextInput({ label, name }: { label: string; name: string }) {
+		const { getInputProps } = useField(name);
+		return (
+			<div className="mb-4">
+				<label className="block text-sm font-medium mb-1">
+					{label}
+				</label>
+				<input
+					{...getInputProps({ type: 'text' })}
+					className="border p-2 w-full"
+				/>
+			</div>
+		);
+	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Create Folder</h1>
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-				<div>
-					<label htmlFor="name" className="block text-sm font-medium">
-						Folder Name
-					</label>
-					<input
-						id="name"
-						{...register('name', { required: true })}
-						className="mt-1 w-full border p-2"
-					/>
-					{errors.name && (
-						<p className="text-red-500">Name is required</p>
-					)}
-				</div>
-				<div>
-					<label
-						htmlFor="description"
-						className="block text-sm font-medium"
-					>
-						Description
-					</label>
-					<textarea
-						id="description"
-						{...register('description')}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
+			<Form>
+				<TextInput label="Folder Name" name="name" />
+				<TextInput label="Description" name="description" />
+				{mutation.isError && (
+					<p className="text-red-500">Error creating folder.</p>
+				)}
 				<button
 					type="submit"
+					disabled={!canSubmit || isSubmitting}
 					className="px-4 py-2 bg-blue-600 text-white"
-					disabled={mutation.isLoading}
 				>
-					Create
+					{isSubmitting ? 'Creating...' : 'Create'}
 				</button>
-				{mutation.error && (
-					<p className="text-red-500 mt-2">Error creating folder.</p>
-				)}
-			</form>
+			</Form>
 		</div>
 	);
 }

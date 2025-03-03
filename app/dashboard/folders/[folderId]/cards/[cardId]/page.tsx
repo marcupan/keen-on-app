@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm, useField } from '@tanstack/react-form';
 
 interface Card {
 	id: string;
@@ -12,13 +12,6 @@ interface Card {
 	imageUrl?: string;
 	sentence?: string;
 }
-
-type CardForm = {
-	word: string;
-	translation: string;
-	imageUrl?: string;
-	sentence?: string;
-};
 
 export default function EditCardPage() {
 	const { folderId, cardId } = useParams() as {
@@ -39,29 +32,62 @@ export default function EditCardPage() {
 					},
 				}
 			);
-			if (!res.ok) {
-				throw new Error('Error fetching card');
-			}
+			if (!res.ok) throw new Error('Error fetching card');
 			return res.json();
 		},
 		{ enabled: !!cardId }
 	);
 
-	const { register, handleSubmit, reset } = useForm<CardForm>();
+	const {
+		Form,
+		meta: { canSubmit, isSubmitting },
+		setValues,
+	} = useForm({
+		onSubmit: async (values) => {
+			await mutation.mutateAsync(values);
+			router.push(`/dashboard/folders/${folderId}`);
+		},
+		defaultValues: {
+			word: '',
+			translation: '',
+			imageUrl: '',
+			sentence: '',
+		},
+	});
 
 	React.useEffect(() => {
 		if (data) {
-			reset({
+			setValues({
 				word: data.word,
 				translation: data.translation,
-				imageUrl: data.imageUrl,
-				sentence: data.sentence,
+				imageUrl: data.imageUrl ?? '',
+				sentence: data.sentence ?? '',
 			});
 		}
-	}, [data, reset]);
+	}, [data, setValues]);
+
+	function TextInput({ label, name }: { label: string; name: string }) {
+		const { getInputProps } = useField(name);
+		return (
+			<div className="mb-4">
+				<label className="block text-sm font-medium mb-1">
+					{label}
+				</label>
+				<input
+					{...getInputProps({ type: 'text' })}
+					className="border p-2 w-full"
+				/>
+			</div>
+		);
+	}
 
 	const mutation = useMutation(
-		async (updated: CardForm) => {
+		async (updated: {
+			word: string;
+			translation: string;
+			imageUrl?: string;
+			sentence?: string;
+		}) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
 				{
@@ -73,22 +99,15 @@ export default function EditCardPage() {
 					body: JSON.stringify(updated),
 				}
 			);
-			if (!res.ok) {
-				throw new Error('Error updating card');
-			}
+			if (!res.ok) throw new Error('Error updating card');
 			return res.json();
 		},
 		{
 			onSuccess: () => {
 				queryClient.invalidateQueries(['card', cardId]);
-				router.push(`/dashboard/folders/${folderId}`);
 			},
 		}
 	);
-
-	const onSubmit = (formData: CardForm) => {
-		mutation.mutate(formData);
-	};
 
 	if (isLoading) return <p>Loading card...</p>;
 	if (error) return <p className="text-red-500">Error loading card.</p>;
@@ -96,67 +115,22 @@ export default function EditCardPage() {
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Edit Card</h1>
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-				<div>
-					<label htmlFor="word" className="block text-sm font-medium">
-						Word
-					</label>
-					<input
-						id="word"
-						{...register('word', { required: true })}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
-				<div>
-					<label
-						htmlFor="translation"
-						className="block text-sm font-medium"
-					>
-						Translation
-					</label>
-					<input
-						id="translation"
-						{...register('translation', { required: true })}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
-				<div>
-					<label
-						htmlFor="imageUrl"
-						className="block text-sm font-medium"
-					>
-						Image URL
-					</label>
-					<input
-						id="imageUrl"
-						{...register('imageUrl')}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
-				<div>
-					<label
-						htmlFor="sentence"
-						className="block text-sm font-medium"
-					>
-						Sentence
-					</label>
-					<textarea
-						id="sentence"
-						{...register('sentence')}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
+			<Form>
+				<TextInput label="Word" name="word" />
+				<TextInput label="Translation" name="translation" />
+				<TextInput label="Image URL" name="imageUrl" />
+				<TextInput label="Sentence" name="sentence" />
+				{mutation.isError && (
+					<p className="text-red-500">Error updating card.</p>
+				)}
 				<button
 					type="submit"
+					disabled={!canSubmit || isSubmitting}
 					className="px-4 py-2 bg-blue-600 text-white"
-					disabled={mutation.isLoading}
 				>
-					Save
+					{isSubmitting ? 'Saving...' : 'Save'}
 				</button>
-				{mutation.error && (
-					<p className="text-red-500 mt-2">Error updating card.</p>
-				)}
-			</form>
+			</Form>
 		</div>
 	);
 }

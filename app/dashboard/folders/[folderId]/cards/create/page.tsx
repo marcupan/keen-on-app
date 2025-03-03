@@ -2,15 +2,8 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-type CardForm = {
-	word: string;
-	translation: string;
-	imageUrl?: string;
-	sentence?: string;
-};
+import { useForm, useField } from '@tanstack/react-form';
 
 export default function CreateCardPage() {
 	const { folderId } = useParams() as { folderId: string };
@@ -18,7 +11,12 @@ export default function CreateCardPage() {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation(
-		async (data: CardForm) => {
+		async (data: {
+			word: string;
+			translation: string;
+			imageUrl?: string;
+			sentence?: string;
+		}) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/cards`,
 				{
@@ -30,99 +28,66 @@ export default function CreateCardPage() {
 					body: JSON.stringify({ ...data, folderId }),
 				}
 			);
-			if (!res.ok) {
-				throw new Error('Error creating card');
-			}
+			if (!res.ok) throw new Error('Error creating card');
 			return res.json();
 		},
 		{
 			onSuccess: () => {
 				queryClient.invalidateQueries(['cards', folderId]);
-				router.push(`/dashboard/folders/${folderId}`);
 			},
 		}
 	);
 
 	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<CardForm>();
+		Form,
+		meta: { canSubmit, isSubmitting },
+	} = useForm({
+		onSubmit: async (values) => {
+			await mutation.mutateAsync(values);
+			router.push(`/dashboard/folders/${folderId}`);
+		},
+		defaultValues: {
+			word: '',
+			translation: '',
+			imageUrl: '',
+			sentence: '',
+		},
+	});
 
-	const onSubmit = (formData: CardForm) => {
-		mutation.mutate(formData);
-	};
+	function TextInput({ label, name }: { label: string; name: string }) {
+		const { getInputProps } = useField(name);
+		return (
+			<div className="mb-4">
+				<label className="block text-sm font-medium mb-1">
+					{label}
+				</label>
+				<input
+					{...getInputProps({ type: 'text' })}
+					className="border p-2 w-full"
+				/>
+			</div>
+		);
+	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Create Card</h1>
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-				<div>
-					<label htmlFor="word" className="block text-sm font-medium">
-						Word
-					</label>
-					<input
-						id="word"
-						{...register('word', { required: true })}
-						className="mt-1 w-full border p-2"
-					/>
-					{errors.word && (
-						<p className="text-red-500">Word is required</p>
-					)}
-				</div>
-				<div>
-					<label
-						htmlFor="translation"
-						className="block text-sm font-medium"
-					>
-						Translation
-					</label>
-					<input
-						id="translation"
-						{...register('translation', { required: true })}
-						className="mt-1 w-full border p-2"
-					/>
-					{errors.translation && (
-						<p className="text-red-500">Translation is required</p>
-					)}
-				</div>
-				<div>
-					<label
-						htmlFor="imageUrl"
-						className="block text-sm font-medium"
-					>
-						Image URL
-					</label>
-					<input
-						id="imageUrl"
-						{...register('imageUrl')}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
-				<div>
-					<label
-						htmlFor="sentence"
-						className="block text-sm font-medium"
-					>
-						Sentence
-					</label>
-					<textarea
-						id="sentence"
-						{...register('sentence')}
-						className="mt-1 w-full border p-2"
-					/>
-				</div>
+			<Form>
+				<TextInput label="Word" name="word" />
+				<TextInput label="Translation" name="translation" />
+				<TextInput label="Image URL" name="imageUrl" />
+				<TextInput label="Sentence" name="sentence" />
+				{mutation.isError && (
+					<p className="text-red-500">Error creating card.</p>
+				)}
 				<button
 					type="submit"
+					disabled={!canSubmit || isSubmitting}
 					className="px-4 py-2 bg-blue-600 text-white"
-					disabled={mutation.isLoading}
 				>
-					Create
+					{isSubmitting ? 'Creating...' : 'Create'}
 				</button>
-				{mutation.error && (
-					<p className="text-red-500 mt-2">Error creating card.</p>
-				)}
-			</form>
+			</Form>
 		</div>
 	);
 }

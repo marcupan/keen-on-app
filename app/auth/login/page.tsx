@@ -1,85 +1,164 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm, useField } from '@tanstack/react-form';
+import * as React from 'react';
+import { useForm } from '@tanstack/react-form';
+import { z } from 'zod';
+import type { AnyFieldApi } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
-import { useAuth } from '@/app/lib/auth';
-
-export default function LoginPage() {
-	const router = useRouter();
-	const { login } = useAuth();
-
-	const mutation = useMutation(
-		async (data: { email: string; password: string }) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(data),
-				}
-			);
-			if (!res.ok) throw new Error('Login failed');
-			return res.json();
-		}
+// A helper component to display field errors and validation info
+function FieldInfo({ field }: { field: AnyFieldApi }) {
+	return (
+		<>
+			{field.state.meta.isTouched &&
+				field.state.meta.errors.length > 0 && (
+					<em className="text-red-500">
+						{field.state.meta.errors
+							.map((err) => err.message)
+							.join(', ')}
+					</em>
+				)}
+			{field.state.meta.isValidating && 'Validating...'}
+		</>
 	);
+}
 
-	const {
-		Form,
-		meta: { canSubmit, isSubmitting },
-	} = useForm({
-		onSubmit: async (values) => {
-			const result = await mutation.mutateAsync(values);
-			if (result.access_token) {
-				login(result.access_token);
-				router.push('/dashboard');
+// Zod schema for validating login form values
+const LoginSchema = z.object({
+	email: z.string().email('Invalid email address'),
+	password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+// Infer the types for our form values
+type LoginValues = z.infer<typeof LoginSchema>;
+
+// Define the expected response type from the login API
+type LoginResponse = {
+	access_token: string;
+};
+
+export default function LoginForm() {
+	const router = useRouter();
+
+	const mutation = useMutation<LoginResponse, Error, LoginValues>({
+		mutationFn: async (values: LoginValues) => {
+			const res = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(values),
+			});
+
+			if (!res.ok) {
+				let errorMessage = 'Login failed';
+
+				try {
+					const errorData = await res.json();
+
+					console.log(errorData);
+
+					errorMessage = errorData.message || errorMessage;
+				} catch {
+					// Fallback to default error message if parsing fails
+				}
+
+				throw new Error(errorMessage);
 			}
+
+			return res.json() as Promise<LoginResponse>;
 		},
-		defaultValues: {
-			email: '',
-			password: '',
+		onSuccess: (data) => {
+			console.log('Login successful, token:', data.access_token);
+
+			router.push('/dashboard');
 		},
 	});
 
-	// Simple text input component using useField()
-	function TextInput({ label, name }: { label: string; name: string }) {
-		const { getInputProps, getMeta } = useField(name);
-		const meta = getMeta();
-		return (
-			<div className="mb-4">
-				<label className="block text-sm font-medium mb-1">
-					{label}
-				</label>
-				<input
-					{...getInputProps({ type: 'text' })}
-					className="border p-2 w-full"
-				/>
-				{meta.error && <p className="text-red-500">{meta.error}</p>}
-			</div>
-		);
-	}
+	const form = useForm({
+		defaultValues: { email: '', password: '' },
+		validators: { onChange: LoginSchema },
+		onSubmit: async ({ value }) => {
+			await mutation.mutateAsync(value);
+		},
+	});
 
 	return (
 		<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
 			<h1 className="text-2xl mb-4">Login</h1>
-			<Form>
-				<TextInput label="Email" name="email" />
-				<TextInput label="Password" name="password" />
-				{mutation.isError && (
-					<p className="text-red-500 mb-2">
-						{(mutation.error as Error).message}
-					</p>
-				)}
-				<button
-					type="submit"
-					disabled={!canSubmit || isSubmitting}
-					className="px-4 py-2 bg-blue-600 text-white"
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+			>
+				<form.Field name="email">
+					{(field) => (
+						<div className="mb-4">
+							<label
+								htmlFor={field.name}
+								className="block text-sm font-medium mb-1"
+							>
+								Email:
+							</label>
+							<input
+								id={field.name}
+								name={field.name}
+								type="email"
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+								className="border p-2 w-full"
+							/>
+							<FieldInfo field={field} />
+						</div>
+					)}
+				</form.Field>
+				<form.Field name="password">
+					{(field) => (
+						<div className="mb-4">
+							<label
+								htmlFor={field.name}
+								className="block text-sm font-medium mb-1"
+							>
+								Password:
+							</label>
+							<input
+								id={field.name}
+								name={field.name}
+								type="password"
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+								className="border p-2 w-full"
+							/>
+							<FieldInfo field={field} />
+						</div>
+					)}
+				</form.Field>
+				<form.Subscribe
+					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
-					{isSubmitting ? 'Logging in...' : 'Login'}
-				</button>
-			</Form>
+					{([canSubmit, isSubmitting]) => (
+						<button
+							type="submit"
+							disabled={!canSubmit || isSubmitting}
+							className="mt-4 px-4 py-2 bg-blue-600 text-white"
+						>
+							{isSubmitting ? 'Logging in...' : 'Login'}
+						</button>
+					)}
+				</form.Subscribe>
+			</form>
+			{mutation.isError && (
+				<p className="text-red-500 mt-2">
+					{(mutation.error as Error).message}
+				</p>
+			)}
 		</div>
 	);
 }

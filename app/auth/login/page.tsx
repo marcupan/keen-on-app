@@ -7,7 +7,6 @@ import type { AnyFieldApi } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
-// A helper component to display field errors and validation info
 function FieldInfo({ field }: { field: AnyFieldApi }) {
 	return (
 		<>
@@ -24,16 +23,13 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
 	);
 }
 
-// Zod schema for validating login form values
 const LoginSchema = z.object({
 	email: z.string().email('Invalid email address'),
 	password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-// Infer the types for our form values
 type LoginValues = z.infer<typeof LoginSchema>;
 
-// Define the expected response type from the login API
 type LoginResponse = {
 	access_token: string;
 };
@@ -58,9 +54,7 @@ export default function LoginForm() {
 					console.log(errorData);
 
 					errorMessage = errorData.message || errorMessage;
-				} catch {
-					// Fallback to default error message if parsing fails
-				}
+				} catch {}
 
 				throw new Error(errorMessage);
 			}

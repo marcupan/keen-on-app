@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 const CreateFolderSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
-	description: z.string().optional(),
+	description: z.string(),
 });
 
 type CreateFolderValues = z.infer<typeof CreateFolderSchema>;
@@ -16,7 +16,6 @@ type CreateFolderValues = z.infer<typeof CreateFolderSchema>;
 type CreateFolderResponse = {
 	message: string;
 };
-
 
 const BackendErrorSchema = z.object({
 	status: z.string(),
@@ -37,8 +36,12 @@ export default function CreateFolderPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	const mutation = useMutation<CreateFolderResponse, Error, CreateFolderValues>(
-		async (data: CreateFolderValues) => {
+	const mutation = useMutation<
+		CreateFolderResponse,
+		Error,
+		CreateFolderValues
+	>({
+		mutationFn: async (data) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders`,
 				{
@@ -50,11 +53,14 @@ export default function CreateFolderPage() {
 					body: JSON.stringify(data),
 				}
 			);
+
 			if (!res.ok) {
 				let errorMessage = 'Error creating folder';
+
 				try {
 					const errorData = await res.json();
 					const parsedError = BackendErrorSchema.parse(errorData);
+
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
 						.join(', ');
@@ -65,12 +71,10 @@ export default function CreateFolderPage() {
 
 			return res.json();
 		},
-		{
-			onSuccess: () => {
-				queryClient.invalidateQueries(['folders']);
-			},
-		}
-	);
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['folders'] });
+		},
+	});
 
 	const form = useForm({
 		defaultValues: {
@@ -84,8 +88,13 @@ export default function CreateFolderPage() {
 		},
 	});
 
-	// A helper component for text inputs using our form instance.
-	function TextInput({ label, name }: { label: string; name: string }) {
+	function TextInput({
+		label,
+		name,
+	}: {
+		label: string;
+		name: 'name' | 'description';
+	}) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

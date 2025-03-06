@@ -54,7 +54,7 @@ export default function RegisterForm() {
 	const router = useRouter();
 
 	const mutation = useMutation<RegisterResponse, Error, RegisterValues>({
-		mutationFn: async (values: RegisterValues) => {
+		mutationFn: async (values) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
 				{

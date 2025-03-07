@@ -1,54 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import { useForm } from '@tanstack/react-form';
-import { z } from 'zod';
-import type { AnyFieldApi } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
+
 import { useRouter } from 'next/navigation';
 
-function FieldInfo({ field }: { field: AnyFieldApi }) {
-	return (
-		<>
-			{field.state.meta.isTouched &&
-				field.state.meta.errors.length > 0 && (
-					<em className="text-red-500">
-						{field.state.meta.errors
-							.map((err) => err.message)
-							.join(', ')}
-					</em>
-				)}
-			{field.state.meta.isValidating && 'Validating...'}
-		</>
-	);
-}
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from '@tanstack/react-form';
 
-const RegisterSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
-	email: z.string().email('Invalid email address'),
-	password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+import { z } from 'zod';
 
-type RegisterValues = z.infer<typeof RegisterSchema>;
+import RegisterValidationSchema from '@/app/validations/register';
+import ApiErrorValidationSchema from '@/app/validations/errors';
+import FieldInfo from '@/app/components/FieldInfo';
+
+type RegisterValues = z.infer<typeof RegisterValidationSchema>;
 
 type RegisterResponse = {
 	message: string;
 };
-
-const BackendErrorSchema = z.object({
-	status: z.string(),
-	errors: z.array(
-		z.object({
-			code: z.string(),
-			minimum: z.number().optional(),
-			type: z.string(),
-			inclusive: z.boolean().optional(),
-			exact: z.boolean().optional(),
-			message: z.string(),
-			path: z.array(z.string()),
-		})
-	),
-});
 
 export default function RegisterForm() {
 	const router = useRouter();
@@ -69,7 +38,8 @@ export default function RegisterForm() {
 
 				try {
 					const errorData = await res.json();
-					const parsedError = BackendErrorSchema.parse(errorData);
+					const parsedError = ApiErrorValidationSchema.parse(errorData);
+
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
 						.join(', ');
@@ -78,7 +48,7 @@ export default function RegisterForm() {
 				throw new Error(errorMessage);
 			}
 
-			return res.json() as Promise<RegisterResponse>;
+			return res.json();
 		},
 		onSuccess: () => {
 			router.push('/auth/login');
@@ -86,8 +56,14 @@ export default function RegisterForm() {
 	});
 
 	const form = useForm({
-		defaultValues: { name: '', email: '', password: '' },
-		validators: { onChange: RegisterSchema },
+		defaultValues: {
+			name: '',
+			email: '',
+			password: '',
+		},
+		validators: {
+			onChange: RegisterValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
 		},

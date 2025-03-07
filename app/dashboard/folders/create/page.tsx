@@ -1,36 +1,23 @@
 'use client';
 
 import React from 'react';
+
 import { useRouter } from 'next/navigation';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+
 import { z } from 'zod';
 
-const CreateFolderSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
-	description: z.string(),
-});
+import CreateFolderValidationSchema from '@/app/validations/folder';
+import ApiErrorValidationSchema from '@/app/validations/errors';
+import FieldInfo from '@/app/components/FieldInfo';
 
-type CreateFolderValues = z.infer<typeof CreateFolderSchema>;
+type CreateFolderValues = z.infer<typeof CreateFolderValidationSchema>;
 
 type CreateFolderResponse = {
 	message: string;
 };
-
-const BackendErrorSchema = z.object({
-	status: z.string(),
-	errors: z.array(
-		z.object({
-			code: z.string(),
-			minimum: z.number().optional(),
-			type: z.string(),
-			inclusive: z.boolean().optional(),
-			exact: z.boolean().optional(),
-			message: z.string(),
-			path: z.array(z.string()),
-		})
-	),
-});
 
 export default function CreateFolderPage() {
 	const router = useRouter();
@@ -59,7 +46,8 @@ export default function CreateFolderPage() {
 
 				try {
 					const errorData = await res.json();
-					const parsedError = BackendErrorSchema.parse(errorData);
+					const parsedError =
+						ApiErrorValidationSchema.parse(errorData);
 
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
@@ -81,9 +69,12 @@ export default function CreateFolderPage() {
 			name: '',
 			description: '',
 		},
-		validators: { onChange: CreateFolderSchema },
+		validators: {
+			onChange: CreateFolderValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
+
 			router.push('/dashboard');
 		},
 	});
@@ -114,6 +105,7 @@ export default function CreateFolderPage() {
 							onChange={(e) => field.handleChange(e.target.value)}
 							className="border p-2 w-full"
 						/>
+						<FieldInfo field={field} />
 					</div>
 				)}
 			</form.Field>

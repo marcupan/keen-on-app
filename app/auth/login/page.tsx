@@ -1,34 +1,19 @@
 'use client';
 
 import * as React from 'react';
-import { useForm } from '@tanstack/react-form';
-import { z } from 'zod';
-import type { AnyFieldApi } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
+
 import { useRouter } from 'next/navigation';
 
-function FieldInfo({ field }: { field: AnyFieldApi }) {
-	return (
-		<>
-			{field.state.meta.isTouched &&
-				field.state.meta.errors.length > 0 && (
-					<em className="text-red-500">
-						{field.state.meta.errors
-							.map((err) => err.message)
-							.join(', ')}
-					</em>
-				)}
-			{field.state.meta.isValidating && 'Validating...'}
-		</>
-	);
-}
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from '@tanstack/react-form';
 
-const LoginSchema = z.object({
-	email: z.string().email('Invalid email address'),
-	password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+import { z } from 'zod';
 
-type LoginValues = z.infer<typeof LoginSchema>;
+import ApiErrorValidationSchema from '@/app/validations/errors';
+import LoginValidationSchema from '@/app/validations/login';
+import FieldInfo from '@/app/components/FieldInfo';
+
+type LoginValues = z.infer<typeof LoginValidationSchema>;
 
 type LoginResponse = {
 	access_token: string;
@@ -50,10 +35,11 @@ export default function LoginForm() {
 
 				try {
 					const errorData = await res.json();
+					const parsedError = ApiErrorValidationSchema.parse(errorData);
 
-					console.log(errorData);
-
-					errorMessage = errorData.message || errorMessage;
+					errorMessage = parsedError.errors
+						.map((err) => err.message)
+						.join(', ');
 				} catch {}
 
 				throw new Error(errorMessage);
@@ -69,8 +55,13 @@ export default function LoginForm() {
 	});
 
 	const form = useForm({
-		defaultValues: { email: '', password: '' },
-		validators: { onChange: LoginSchema },
+		defaultValues: {
+			email: '',
+			password: '',
+		},
+		validators: {
+			onChange: LoginValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
 		},

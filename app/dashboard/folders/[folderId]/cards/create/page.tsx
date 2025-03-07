@@ -1,38 +1,23 @@
 'use client';
 
 import React from 'react';
+
 import { useParams, useRouter } from 'next/navigation';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+
 import { z } from 'zod';
 
-const CreateCardSchema = z.object({
-	word: z.string().min(1, 'Word is required'),
-	translation: z.string().min(1, 'Translation is required'),
-	imageUrl: z.string(),
-	sentence: z.string(),
-});
+import CreateCardValidationSchema from '@/app/validations/card';
+import ApiErrorValidationSchema from '@/app/validations/errors';
+import FieldInfo from '@/app/components/FieldInfo';
 
-type CreateCardValues = z.infer<typeof CreateCardSchema>; // { word: string; translation: string; imageUrl: string; sentence: string }
+type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
 
 type CreateCardResponse = {
 	message: string;
 };
-
-const BackendErrorSchema = z.object({
-	status: z.string(),
-	errors: z.array(
-		z.object({
-			code: z.string(),
-			minimum: z.number().optional(),
-			type: z.string(),
-			inclusive: z.boolean().optional(),
-			exact: z.boolean().optional(),
-			message: z.string(),
-			path: z.array(z.string()),
-		})
-	),
-});
 
 export default function CreateCardPage() {
 	const { folderId } = useParams() as { folderId: string };
@@ -55,9 +40,11 @@ export default function CreateCardPage() {
 
 			if (!res.ok) {
 				let errorMessage = 'Error creating card';
+
 				try {
 					const errorData = await res.json();
-					const parsedError = BackendErrorSchema.parse(errorData);
+					const parsedError = ApiErrorValidationSchema.parse(errorData);
+
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
 						.join(', ');
@@ -80,9 +67,12 @@ export default function CreateCardPage() {
 			imageUrl: '',
 			sentence: '',
 		},
-		validators: { onChange: CreateCardSchema },
+		validators: {
+			onChange: CreateCardValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
+
 			router.push(`/dashboard/folders/${folderId}`);
 		},
 	});
@@ -113,6 +103,7 @@ export default function CreateCardPage() {
 							onChange={(e) => field.handleChange(e.target.value)}
 							className="border p-2 w-full"
 						/>
+						<FieldInfo field={field} />
 					</div>
 				)}
 			</form.Field>

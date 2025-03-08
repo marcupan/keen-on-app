@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../../lib/auth';
+
+import { useAuth } from '@/app/lib/auth';
+
 
 interface UserProfile {
 	id: string;
@@ -13,10 +15,9 @@ interface UserProfile {
 export default function ProfilePage() {
 	const { isAuthenticated } = useAuth();
 
-	// Example: fetch user profile from external API
-	const { data, isLoading, error } = useQuery<UserProfile>(
-		['profile'],
-		async () => {
+	const { data, isLoading, error } = useQuery<UserProfile>({
+		queryKey: ['profile'],
+		queryFn: async () => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
 				{
@@ -30,10 +31,11 @@ export default function ProfilePage() {
 			}
 			return res.json();
 		},
-		{ enabled: isAuthenticated }
-	);
+		enabled: isAuthenticated,
+	});
 
 	if (isLoading) return <p>Loading profile...</p>;
+
 	if (error) return <p className="text-red-500">Error loading profile.</p>;
 
 	return (

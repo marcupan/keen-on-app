@@ -10,9 +10,9 @@ interface Folder {
 }
 
 export default function DashboardPage() {
-	const { data, isLoading, error } = useQuery<Folder[]>(
-		['folders'],
-		async () => {
+	const { data, isLoading, error } = useQuery<Folder[]>({
+		queryKey: ['folders'],
+		queryFn: async () => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders`,
 				{
@@ -24,9 +24,9 @@ export default function DashboardPage() {
 			if (!res.ok) {
 				throw new Error('Error fetching folders');
 			}
-			return res.json();
-		}
-	);
+			return res.json() as Promise<Folder[]>;
+		},
+	});
 
 	return (
 		<div>

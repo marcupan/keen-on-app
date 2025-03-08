@@ -3,7 +3,7 @@
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm, useField } from '@tanstack/react-form';
+import { useForm } from '@tanstack/react-form';
 
 interface Folder {
 	id: string;
@@ -11,110 +11,147 @@ interface Folder {
 	description?: string;
 }
 
+type UpdateFolderValues = {
+	name: string;
+	description: string;
+};
+
+type UpdateFolderResponse = {
+	message: string;
+};
+
+const mutationHeaders = {
+	'Content-Type': 'application/json',
+	Authorization: `Bearer ${localStorage.getItem('token')}`,
+};
+
+const queryHeaders = {
+	Authorization: `Bearer ${localStorage.getItem('token')}`,
+};
+
 export default function FolderDetailsPage() {
 	const { folderId } = useParams() as { folderId: string };
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	const { data, isLoading, error } = useQuery<Folder>(
-		['folder', folderId],
-		async () => {
+	// Use object syntax for useQuery
+	const { data, isLoading, error } = useQuery<Folder>({
+		queryKey: ['folder', folderId],
+		queryFn: async () => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
 				{
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
-					},
+					headers: queryHeaders,
 				}
 			);
 			if (!res.ok) throw new Error('Error fetching folder');
+			return res.json() as Promise<Folder>;
+		},
+		enabled: !!folderId,
+	});
+
+	const mutation = useMutation<
+		UpdateFolderResponse,
+		Error,
+		UpdateFolderValues
+	>({
+		mutationFn: async (updated: UpdateFolderValues) => {
+			const res = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
+				{
+					method: 'PATCH',
+					headers: mutationHeaders,
+					body: JSON.stringify(updated),
+				}
+			);
+			if (!res.ok) throw new Error('Error updating folder');
+
 			return res.json();
 		},
-		{ enabled: !!folderId }
-	);
-
-	const {
-		Form,
-		meta: { canSubmit, isSubmitting },
-		setValues,
-	} = useForm({
-		onSubmit: async (values) => {
-			await mutation.mutateAsync(values);
-			router.push('/dashboard');
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['folder', folderId] });
 		},
-		defaultValues: {
-			name: '',
-			description: '',
+	});
+
+	const form = useForm({
+		defaultValues: { name: '', description: '' },
+		onSubmit: async ({ value }) => {
+			await mutation.mutateAsync(value);
+			router.push('/dashboard');
 		},
 	});
 
 	React.useEffect(() => {
 		if (data) {
-			setValues({
-				name: data.name || '',
+			form.reset({
+				name: data.name,
 				description: data.description || '',
 			});
 		}
-	}, [data, setValues]);
+	}, [data, form]);
 
-	function TextInput({ label, name }: { label: string; name: string }) {
-		const { getInputProps } = useField(name);
+	function TextInput({
+		label,
+		name,
+	}: {
+		label: string;
+		name: keyof UpdateFolderValues;
+	}) {
 		return (
-			<div className="mb-4">
-				<label className="block text-sm font-medium mb-1">
-					{label}
-				</label>
-				<input
-					{...getInputProps({ type: 'text' })}
-					className="border p-2 w-full"
-				/>
-			</div>
+			<form.Field name={name}>
+				{(field) => (
+					<div className="mb-4">
+						<label
+							htmlFor={field.name}
+							className="block text-sm font-medium mb-1"
+						>
+							{label}
+						</label>
+						<input
+							id={field.name}
+							name={field.name}
+							type="text"
+							value={field.state.value}
+							onBlur={field.handleBlur}
+							onChange={(e) => field.handleChange(e.target.value)}
+							className="border p-2 w-full"
+						/>
+					</div>
+				)}
+			</form.Field>
 		);
 	}
 
-	const mutation = useMutation(
-		async (updated: { name: string; description?: string }) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
-				{
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
-					},
-					body: JSON.stringify(updated),
-				}
-			);
-			if (!res.ok) throw new Error('Error updating folder');
-			return res.json();
-		},
-		{
-			onSuccess: () => {
-				queryClient.invalidateQueries(['folder', folderId]);
-			},
-		}
-	);
-
 	if (isLoading) return <p>Loading folder...</p>;
+
 	if (error) return <p className="text-red-500">Error loading folder.</p>;
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Edit Folder</h1>
-			<Form>
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+			>
 				<TextInput label="Folder Name" name="name" />
 				<TextInput label="Description" name="description" />
-				{mutation.isError && (
-					<p className="text-red-500">Error updating folder.</p>
-				)}
-				<button
-					type="submit"
-					disabled={!canSubmit || isSubmitting}
-					className="px-4 py-2 bg-blue-600 text-white"
+				<form.Subscribe
+					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
-					{isSubmitting ? 'Saving...' : 'Save'}
-				</button>
-			</Form>
+					{([canSubmit, isSubmitting]) => (
+						<button
+							type="submit"
+							disabled={!canSubmit || isSubmitting}
+							className="px-4 py-2 bg-blue-600 text-white"
+						>
+							{isSubmitting ? 'Saving...' : 'Save'}
+						</button>
+					)}
+				</form.Subscribe>
+			</form>
 			<div className="mt-6">
 				<a
 					href={`/dashboard/folders/${folderId}/cards/create`}

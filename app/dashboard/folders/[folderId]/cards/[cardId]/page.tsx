@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+
+import CreateCardValidationSchema from '@/app/validations/card';
 
 interface Card {
 	id: string;
@@ -36,7 +38,6 @@ export default function EditCardPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	// Use object syntax for useQuery
 	const { data, isLoading, error } = useQuery<Card>({
 		queryKey: ['card', cardId],
 		queryFn: async () => {
@@ -54,7 +55,6 @@ export default function EditCardPage() {
 		enabled: !!cardId,
 	});
 
-	// Define the mutation for updating the card.
 	const mutation = useMutation<UpdateCardResponse, Error, UpdateCardValues>({
 		mutationFn: async (updated: UpdateCardValues) => {
 			const res = await fetch(
@@ -83,13 +83,17 @@ export default function EditCardPage() {
 			imageUrl: '',
 			sentence: '',
 		},
+		validators: {
+			onChange: CreateCardValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
+
 			router.push(`/dashboard/folders/${folderId}`);
 		},
 	});
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (data) {
 			form.reset({
 				word: data.word,
@@ -122,9 +126,9 @@ export default function EditCardPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 					</div>
 				)}

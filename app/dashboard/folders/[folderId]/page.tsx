@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+
+import CreateFolderValidationSchema from '@/app/validations/folder';
 
 interface Folder {
 	id: string;
@@ -34,7 +36,6 @@ export default function FolderDetailsPage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	// Use object syntax for useQuery
 	const { data, isLoading, error } = useQuery<Folder>({
 		queryKey: ['folder', folderId],
 		queryFn: async () => {
@@ -74,14 +75,21 @@ export default function FolderDetailsPage() {
 	});
 
 	const form = useForm({
-		defaultValues: { name: '', description: '' },
+		defaultValues: {
+			name: '',
+			description: '',
+		},
+		validators: {
+			onChange: CreateFolderValidationSchema,
+		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
+
 			router.push('/dashboard');
 		},
 	});
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (data) {
 			form.reset({
 				name: data.name,

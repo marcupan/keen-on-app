@@ -3,14 +3,15 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { useAuth } from '../lib/auth';
+import { useAuth } from '@/app/lib/auth';
 
-export default function ProtectedPage({
-	children,
-}: {
+type ProtectedPageProps = {
 	children: React.ReactNode;
-}) {
+};
+
+export default function ProtectedPage({ children }: ProtectedPageProps) {
 	const { isAuthenticated } = useAuth();
+
 	const router = useRouter();
 
 	useEffect(() => {
@@ -20,7 +21,7 @@ export default function ProtectedPage({
 	}, [isAuthenticated, router]);
 
 	if (!isAuthenticated) {
-		return null; // or a loading spinner
+		return null;
 	}
 
 	return <>{children}</>;

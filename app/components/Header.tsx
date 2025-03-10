@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-import { useAuth } from '../lib/auth';
+import { useAuth } from '@/app/lib/auth';
 
 export default function Header() {
 	const { user, logout } = useAuth();
@@ -17,6 +17,7 @@ export default function Header() {
 			</div>
 			<div className="flex items-center space-x-4">
 				{user && <span className="text-sm">Hello, {user.name}</span>}
+
 				<Link href="/profile" className="text-sm underline">
 					Profile
 				</Link>

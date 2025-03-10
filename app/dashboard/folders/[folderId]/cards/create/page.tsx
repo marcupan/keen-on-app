@@ -117,6 +117,7 @@ export default function CreateCardPage() {
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+
 					form.handleSubmit();
 				}}
 			>

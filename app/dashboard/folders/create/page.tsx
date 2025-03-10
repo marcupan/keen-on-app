@@ -101,9 +101,9 @@ export default function CreateFolderPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 						<FieldInfo field={field} />
 					</div>
@@ -119,6 +119,7 @@ export default function CreateFolderPage() {
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+
 					form.handleSubmit();
 				}}
 			>

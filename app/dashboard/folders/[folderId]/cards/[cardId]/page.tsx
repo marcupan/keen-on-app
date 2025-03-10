@@ -26,15 +26,18 @@ type UpdateCardResponse = {
 	message: string;
 };
 
+type QueryParams = {
+	folderId: string;
+	cardId: string;
+};
+
 const queryHeaders = {
 	Authorization: `Bearer ${localStorage.getItem('token')}`,
 };
 
 export default function EditCardPage() {
-	const { folderId, cardId } = useParams() as {
-		folderId: string;
-		cardId: string;
-	};
+	const { folderId, cardId } = useParams<QueryParams>();
+
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
@@ -48,7 +51,9 @@ export default function EditCardPage() {
 				}
 			);
 
-			if (!res.ok) throw new Error('Error fetching card');
+			if (!res.ok) {
+				throw new Error('Error fetching card');
+			}
 
 			return res.json();
 		},
@@ -68,8 +73,12 @@ export default function EditCardPage() {
 					body: JSON.stringify(updated),
 				}
 			);
-			if (!res.ok) throw new Error('Error updating card');
-			return res.json() as Promise<UpdateCardResponse>;
+
+			if (!res.ok) {
+				throw new Error('Error updating card');
+			}
+
+			return res.json();
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['card', cardId] });
@@ -136,9 +145,13 @@ export default function EditCardPage() {
 		);
 	}
 
-	if (isLoading) return <p>Loading card...</p>;
+	if (isLoading) {
+		return <p>Loading card...</p>;
+	}
 
-	if (error) return <p className="text-red-500">Error loading card.</p>;
+	if (error) {
+		return <p className="text-red-500">Error loading card.</p>;
+	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
@@ -147,6 +160,7 @@ export default function EditCardPage() {
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+
 					form.handleSubmit();
 				}}
 			>

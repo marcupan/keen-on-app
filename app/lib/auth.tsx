@@ -29,9 +29,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const storedToken = localStorage.getItem('token');
 		const storedUser = localStorage.getItem('user');
+
 		if (storedToken) {
 			setToken(storedToken);
 		}
+
 		if (storedUser) {
 			setUser(JSON.parse(storedUser));
 		}
@@ -50,8 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const logout = () => {
 		setToken(null);
 		setUser(null);
+
 		localStorage.removeItem('token');
 		localStorage.removeItem('user');
+
 		router.push('/auth/login');
 	};
 

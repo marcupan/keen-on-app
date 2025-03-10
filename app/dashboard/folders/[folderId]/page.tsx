@@ -45,8 +45,12 @@ export default function FolderDetailsPage() {
 					headers: queryHeaders,
 				}
 			);
-			if (!res.ok) throw new Error('Error fetching folder');
-			return res.json() as Promise<Folder>;
+
+			if (!res.ok) {
+				throw new Error('Error fetching folder');
+			}
+
+			return res.json();
 		},
 		enabled: !!folderId,
 	});
@@ -65,7 +69,10 @@ export default function FolderDetailsPage() {
 					body: JSON.stringify(updated),
 				}
 			);
-			if (!res.ok) throw new Error('Error updating folder');
+
+			if (!res.ok) {
+				throw new Error('Error updating folder');
+			}
 
 			return res.json();
 		},
@@ -120,9 +127,9 @@ export default function FolderDetailsPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 					</div>
 				)}
@@ -130,9 +137,13 @@ export default function FolderDetailsPage() {
 		);
 	}
 
-	if (isLoading) return <p>Loading folder...</p>;
+	if (isLoading) {
+		return <p>Loading folder...</p>;
+	}
 
-	if (error) return <p className="text-red-500">Error loading folder.</p>;
+	if (error) {
+		return <p className="text-red-500">Error loading folder.</p>;
+	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
@@ -141,6 +152,7 @@ export default function FolderDetailsPage() {
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
+
 					form.handleSubmit();
 				}}
 			>

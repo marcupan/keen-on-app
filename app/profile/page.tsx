@@ -26,17 +26,23 @@ export default function ProfilePage() {
 					},
 				}
 			);
+
 			if (!res.ok) {
 				throw new Error('Error fetching profile');
 			}
+
 			return res.json();
 		},
 		enabled: isAuthenticated,
 	});
 
-	if (isLoading) return <p>Loading profile...</p>;
+	if (isLoading) {
+		return <p>Loading profile...</p>;
+	}
 
-	if (error) return <p className="text-red-500">Error loading profile.</p>;
+	if (error) {
+		return <p className="text-red-500">Error loading profile.</p>;
+	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow mt-4">

@@ -21,18 +21,23 @@ export default function DashboardPage() {
 					},
 				}
 			);
+
 			if (!res.ok) {
 				throw new Error('Error fetching folders');
 			}
-			return res.json() as Promise<Folder[]>;
+
+			return res.json();
 		},
 	});
 
 	return (
 		<div>
 			<h1 className="text-2xl mb-4">Folders</h1>
+
 			{isLoading && <p>Loading folders...</p>}
+
 			{error && <p className="text-red-500">Failed to load folders.</p>}
+
 			<div className="space-y-2">
 				{data?.map((folder) => (
 					<div key={folder.id} className="p-2 bg-white shadow">

@@ -22,6 +22,10 @@ type UpdateFolderResponse = {
 	message: string;
 };
 
+type QueryProps = {
+	folderId: string;
+};
+
 const mutationHeaders = {
 	'Content-Type': 'application/json',
 	Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -32,8 +36,10 @@ const queryHeaders = {
 };
 
 export default function FolderDetailsPage() {
-	const { folderId } = useParams() as { folderId: string };
+	const { folderId } = useParams<QueryProps>();
+
 	const router = useRouter();
+
 	const queryClient = useQueryClient();
 
 	const { data, isLoading, error } = useQuery<Folder>({

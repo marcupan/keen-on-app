@@ -10,7 +10,7 @@ interface Folder {
 }
 
 export default function DashboardPage() {
-	const { data, isLoading, error } = useQuery<Folder[]>({
+	const { data = [], isLoading, error } = useQuery<Folder[]>({
 		queryKey: ['folders'],
 		queryFn: async () => {
 			const res = await fetch(
@@ -39,7 +39,7 @@ export default function DashboardPage() {
 			{error && <p className="text-red-500">Failed to load folders.</p>}
 
 			<div className="space-y-2">
-				{data?.map((folder) => (
+				{data.map((folder) => (
 					<div key={folder.id} className="p-2 bg-white shadow">
 						<a
 							href={`/dashboard/folders/${folder.id}`}

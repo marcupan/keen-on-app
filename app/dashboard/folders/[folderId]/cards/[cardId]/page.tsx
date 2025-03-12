@@ -39,6 +39,7 @@ export default function EditCardPage() {
 	const { folderId, cardId } = useParams<QueryParams>();
 
 	const router = useRouter();
+
 	const queryClient = useQueryClient();
 
 	const { data, isLoading, error } = useQuery<Card>({

@@ -19,9 +19,15 @@ type CreateCardResponse = {
 	message: string;
 };
 
+type QueryProps = {
+	folderId: string;
+};
+
 export default function CreateCardPage() {
-	const { folderId } = useParams() as { folderId: string };
+	const { folderId } = useParams<QueryProps>();
+
 	const router = useRouter();
+
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation<CreateCardResponse, Error, CreateCardValues>({

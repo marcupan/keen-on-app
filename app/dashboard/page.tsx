@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+
+import { useRouter } from 'next/navigation';
+
 import { useQuery } from '@tanstack/react-query';
 
 interface Folder {
@@ -10,6 +13,8 @@ interface Folder {
 }
 
 export default function DashboardPage() {
+	const router = useRouter();
+
 	const { data = [], isLoading, error } = useQuery<Folder[]>({
 		queryKey: ['folders'],
 		queryFn: async () => {
@@ -54,9 +59,7 @@ export default function DashboardPage() {
 				))}
 			</div>
 			<button
-				onClick={() =>
-					(window.location.href = '/dashboard/folders/create')
-				}
+				onClick={() => router.push('/dashboard/folders/create')}
 				className="mt-4 px-4 py-2 bg-blue-600 text-white"
 			>
 				Create Folder

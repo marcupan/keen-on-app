@@ -21,6 +21,7 @@ type CreateFolderResponse = {
 
 export default function CreateFolderPage() {
 	const router = useRouter();
+
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation<

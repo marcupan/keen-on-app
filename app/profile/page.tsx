@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { useAuth } from '@/app/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 interface UserProfile {
 	id: string;

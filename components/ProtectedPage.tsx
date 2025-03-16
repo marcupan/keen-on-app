@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { useAuth } from '@/app/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 type ProtectedPageProps = {
 	children: React.ReactNode;
@@ -17,7 +17,7 @@ export default function ProtectedPage({ children }: ProtectedPageProps) {
 
 	useEffect(() => {
 		if (!isAuthenticated) {
-			router.replace('/auth/login');
+			router.replace('/login');
 		}
 	}, [isAuthenticated, router]);
 

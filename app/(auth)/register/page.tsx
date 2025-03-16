@@ -1,49 +1,40 @@
 'use client';
 
-import React from 'react';
+import * as React from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
 import { z } from 'zod';
 
-import CreateFolderValidationSchema from '@/app/validations/folder';
-import ApiErrorValidationSchema from '@/app/validations/errors';
-import FieldInfo from '@/app/components/FieldInfo';
+import RegisterValidationSchema from '@/validations/register';
+import ApiErrorValidationSchema from '@/validations/errors';
+import FieldInfo from '@/components/FieldInfo';
 
-type CreateFolderValues = z.infer<typeof CreateFolderValidationSchema>;
+type RegisterValues = z.infer<typeof RegisterValidationSchema>;
 
-type CreateFolderResponse = {
+type RegisterResponse = {
 	message: string;
 };
 
-export default function CreateFolderPage() {
+export default function RegisterForm() {
 	const router = useRouter();
 
-	const queryClient = useQueryClient();
-
-	const mutation = useMutation<
-		CreateFolderResponse,
-		Error,
-		CreateFolderValues
-	>({
-		mutationFn: async (data) => {
+	const mutation = useMutation<RegisterResponse, Error, RegisterValues>({
+		mutationFn: async (values) => {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders`,
+				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
 				{
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
-					},
-					body: JSON.stringify(data),
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(values),
 				}
 			);
 
 			if (!res.ok) {
-				let errorMessage = 'Error creating folder';
+				let errorMessage = 'Registration failed';
 
 				try {
 					const errorData = await res.json();
@@ -61,31 +52,35 @@ export default function CreateFolderPage() {
 			return res.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['folders'] });
+			router.push('/login');
 		},
 	});
 
 	const form = useForm({
 		defaultValues: {
 			name: '',
-			description: '',
+			email: '',
+			password: '',
+			passwordConfirm: '',
 		},
 		validators: {
-			onChange: CreateFolderValidationSchema,
+			onChange: RegisterValidationSchema,
 		},
 		onSubmit: async ({ value }) => {
-			await mutation.mutateAsync(value);
+			console.log('value: ', value);
 
-			router.push('/dashboard');
+			await mutation.mutateAsync(value);
 		},
 	});
 
 	function TextInput({
-		label,
 		name,
+		label,
+		type = 'text',
 	}: {
+		name: 'name' | 'email' | 'password' | 'passwordConfirm';
 		label: string;
-		name: 'name' | 'description';
+		type?: 'text' | 'password';
 	}) {
 		return (
 			<form.Field name={name}>
@@ -100,9 +95,9 @@ export default function CreateFolderPage() {
 						<input
 							id={field.name}
 							name={field.name}
-							type="text"
-							value={field.state.value}
+							type={type}
 							className="border p-2 w-full"
+							value={field.state.value}
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
 						/>
@@ -114,18 +109,21 @@ export default function CreateFolderPage() {
 	}
 
 	return (
-		<div className="max-w-md mx-auto p-4 bg-white shadow">
-			<h1 className="text-xl mb-4">Create Folder</h1>
+		<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
+			<h1 className="text-2xl mb-4">Register</h1>
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
+				onSubmit={(ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
 
 					form.handleSubmit();
 				}}
 			>
-				<TextInput label="Folder Name" name="name" />
-				<TextInput label="Description" name="description" />
+				<TextInput name="name" label="Name" />
+				<TextInput name="email" label="Email" />
+				<TextInput name="password" label="Password" type="password" />
+				<TextInput name="passwordConfirm" label="Confirm Password" type="password" />
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
@@ -133,13 +131,14 @@ export default function CreateFolderPage() {
 						<button
 							type="submit"
 							disabled={!canSubmit || isSubmitting}
-							className="px-4 py-2 bg-blue-600 text-white"
+							className="mt-4 px-4 py-2 bg-blue-600 text-white"
 						>
-							{isSubmitting ? 'Creating...' : 'Create'}
+							{isSubmitting ? 'Registering...' : 'Register'}
 						</button>
 					)}
 				</form.Subscribe>
 			</form>
+
 			{mutation.isError && (
 				<p className="text-red-500 mt-2">
 					{(mutation.error as Error).message}

@@ -2,54 +2,53 @@
 
 import React from 'react';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
 import { z } from 'zod';
 
-import CreateCardValidationSchema from '@/app/validations/card';
-import ApiErrorValidationSchema from '@/app/validations/errors';
-import FieldInfo from '@/app/components/FieldInfo';
+import CreateFolderValidationSchema from '@/validations/folder';
+import ApiErrorValidationSchema from '@/validations/errors';
+import FieldInfo from '@/components/FieldInfo';
 
-type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
+type CreateFolderValues = z.infer<typeof CreateFolderValidationSchema>;
 
-type CreateCardResponse = {
+type CreateFolderResponse = {
 	message: string;
 };
 
-type QueryProps = {
-	folderId: string;
-};
-
-export default function CreateCardPage() {
-	const { folderId } = useParams<QueryProps>();
-
+export default function CreateFolderPage() {
 	const router = useRouter();
 
 	const queryClient = useQueryClient();
 
-	const mutation = useMutation<CreateCardResponse, Error, CreateCardValues>({
-		mutationFn: async (data: CreateCardValues) => {
+	const mutation = useMutation<
+		CreateFolderResponse,
+		Error,
+		CreateFolderValues
+	>({
+		mutationFn: async (data) => {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards`,
+				`${process.env.NEXT_PUBLIC_API_URL}/api/folders`,
 				{
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${localStorage.getItem('token')}`,
 					},
-					body: JSON.stringify({ ...data, folderId }),
+					body: JSON.stringify(data),
 				}
 			);
 
 			if (!res.ok) {
-				let errorMessage = 'Error creating card';
+				let errorMessage = 'Error creating folder';
 
 				try {
 					const errorData = await res.json();
-					const parsedError = ApiErrorValidationSchema.parse(errorData);
+					const parsedError =
+						ApiErrorValidationSchema.parse(errorData);
 
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
@@ -62,24 +61,22 @@ export default function CreateCardPage() {
 			return res.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['cards', folderId] });
+			queryClient.invalidateQueries({ queryKey: ['folders'] });
 		},
 	});
 
 	const form = useForm({
 		defaultValues: {
-			word: '',
-			translation: '',
-			imageUrl: '',
-			sentence: '',
+			name: '',
+			description: '',
 		},
 		validators: {
-			onChange: CreateCardValidationSchema,
+			onChange: CreateFolderValidationSchema,
 		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
 
-			router.push(`/dashboard/folders/${folderId}`);
+			router.push('/dashboard');
 		},
 	});
 
@@ -88,7 +85,7 @@ export default function CreateCardPage() {
 		name,
 	}: {
 		label: string;
-		name: keyof CreateCardValues;
+		name: 'name' | 'description';
 	}) {
 		return (
 			<form.Field name={name}>
@@ -105,9 +102,9 @@ export default function CreateCardPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 						<FieldInfo field={field} />
 					</div>
@@ -118,7 +115,7 @@ export default function CreateCardPage() {
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
-			<h1 className="text-xl mb-4">Create Card</h1>
+			<h1 className="text-xl mb-4">Create Folder</h1>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
@@ -127,10 +124,8 @@ export default function CreateCardPage() {
 					form.handleSubmit();
 				}}
 			>
-				<TextInput label="Word" name="word" />
-				<TextInput label="Translation" name="translation" />
-				<TextInput label="Image URL" name="imageUrl" />
-				<TextInput label="Sentence" name="sentence" />
+				<TextInput label="Folder Name" name="name" />
+				<TextInput label="Description" name="description" />
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>

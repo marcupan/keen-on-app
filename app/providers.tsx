@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { AuthProvider } from '@/app/lib/auth';
+import { AuthProvider } from '@/lib/auth';
 
 
 export default function Providers({ children }: { children: React.ReactNode }) {

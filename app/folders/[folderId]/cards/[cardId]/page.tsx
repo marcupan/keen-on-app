@@ -7,108 +7,103 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import CreateFolderValidationSchema from '@/app/validations/folder';
+import CreateCardValidationSchema from '@/validations/card';
 
-interface Folder {
-	id: string;
-	name: string;
-	description?: string;
-}
-
-type UpdateFolderValues = {
-	name: string;
-	description: string;
+type UpdateCardValues = {
+	word: string;
+	translation: string;
+	imageUrl: string;
+	sentence: string;
 };
 
-type UpdateFolderResponse = {
+type UpdateCardResponse = {
 	message: string;
 };
 
-type QueryProps = {
+type QueryParams = {
 	folderId: string;
-};
-
-const mutationHeaders = {
-	'Content-Type': 'application/json',
-	Authorization: `Bearer ${localStorage.getItem('token')}`,
+	cardId: string;
 };
 
 const queryHeaders = {
 	Authorization: `Bearer ${localStorage.getItem('token')}`,
 };
 
-export default function FolderDetailsPage() {
-	const { folderId } = useParams<QueryProps>();
+export default function EditCardPage() {
+	const { folderId, cardId } = useParams<QueryParams>();
 
 	const router = useRouter();
 
 	const queryClient = useQueryClient();
 
-	const { data, isLoading, error } = useQuery<Folder>({
-		queryKey: ['folder', folderId],
+	const { data, isLoading, error } = useQuery({
+		queryKey: ['card', cardId],
 		queryFn: async () => {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
+				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
 				{
 					headers: queryHeaders,
 				}
 			);
 
 			if (!res.ok) {
-				throw new Error('Error fetching folder');
+				throw new Error('Error fetching card');
 			}
 
 			return res.json();
 		},
-		enabled: !!folderId,
+		enabled: !!cardId,
 	});
 
-	const mutation = useMutation<
-		UpdateFolderResponse,
-		Error,
-		UpdateFolderValues
-	>({
-		mutationFn: async (updated: UpdateFolderValues) => {
+	const mutation = useMutation<UpdateCardResponse, Error, UpdateCardValues>({
+		mutationFn: async (updated: UpdateCardValues) => {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
+				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
 				{
 					method: 'PATCH',
-					headers: mutationHeaders,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${localStorage.getItem('token')}`,
+					},
 					body: JSON.stringify(updated),
 				}
 			);
 
 			if (!res.ok) {
-				throw new Error('Error updating folder');
+				throw new Error('Error updating card');
 			}
 
 			return res.json();
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['folder', folderId] });
+			queryClient.invalidateQueries({ queryKey: ['card', cardId] });
 		},
 	});
 
 	const form = useForm({
 		defaultValues: {
-			name: '',
-			description: '',
+			word: '',
+			translation: '',
+			imageUrl: '',
+			sentence: '',
 		},
 		validators: {
-			onChange: CreateFolderValidationSchema,
+			onChange: CreateCardValidationSchema,
 		},
 		onSubmit: async ({ value }) => {
 			await mutation.mutateAsync(value);
 
-			router.push('/dashboard');
+			router.push(`/dashboard/folders/${folderId}`);
 		},
 	});
 
 	useEffect(() => {
 		if (data) {
 			form.reset({
-				name: data.name,
-				description: data.description || '',
+				word: data.word,
+				translation: data.translation,
+				imageUrl: data.imageUrl ?? '',
+				sentence: data.sentence ?? '',
 			});
 		}
 	}, [data, form]);
@@ -117,8 +112,8 @@ export default function FolderDetailsPage() {
 		label,
 		name,
 	}: {
+		name: keyof UpdateCardValues;
 		label: string;
-		name: keyof UpdateFolderValues;
 	}) {
 		return (
 			<form.Field name={name}>
@@ -146,16 +141,16 @@ export default function FolderDetailsPage() {
 	}
 
 	if (isLoading) {
-		return <p>Loading folder...</p>;
+		return <p>Loading card...</p>;
 	}
 
 	if (error) {
-		return <p className="text-red-500">Error loading folder.</p>;
+		return <p className="text-red-500">Error loading card.</p>;
 	}
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
-			<h1 className="text-xl mb-4">Edit Folder</h1>
+			<h1 className="text-xl mb-4">Edit Card</h1>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
@@ -164,8 +159,11 @@ export default function FolderDetailsPage() {
 					form.handleSubmit();
 				}}
 			>
-				<TextInput label="Folder Name" name="name" />
-				<TextInput label="Description" name="description" />
+				<TextInput label="Word" name="word" />
+				<TextInput label="Translation" name="translation" />
+				<TextInput label="Image URL" name="imageUrl" />
+				<TextInput label="Sentence" name="sentence" />
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
@@ -180,14 +178,6 @@ export default function FolderDetailsPage() {
 					)}
 				</form.Subscribe>
 			</form>
-			<div className="mt-6">
-				<a
-					href={`/dashboard/folders/${folderId}/cards/create`}
-					className="inline-block px-4 py-2 bg-green-600 text-white"
-				>
-					Create Card
-				</a>
-			</div>
 		</div>
 	);
 }

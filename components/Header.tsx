@@ -4,7 +4,7 @@ import React from 'react';
 
 import Link from 'next/link';
 
-import { useAuth } from '@/app/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 export default function Header() {
 	const { user, logout } = useAuth();

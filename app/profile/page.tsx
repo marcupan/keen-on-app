@@ -47,6 +47,7 @@ export default function ProfilePage() {
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow mt-4">
 			<h1 className="text-2xl mb-4">Profile</h1>
+
 			{data && (
 				<div>
 					<p className="mb-2">Name: {data.name}</p>

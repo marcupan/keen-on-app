@@ -13,6 +13,7 @@ const FieldInfo = ({ field }: FieldInfoProps) => (
 				{field.state.meta.errors.map((err) => err.message).join(', ')}
 			</em>
 		)}
+
 		{field.state.meta.isValidating && 'Validating...'}
 	</>
 );

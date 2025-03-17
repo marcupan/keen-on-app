@@ -126,6 +126,7 @@ export default function CreateFolderPage() {
 			>
 				<TextInput label="Folder Name" name="name" />
 				<TextInput label="Description" name="description" />
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
@@ -140,6 +141,7 @@ export default function CreateFolderPage() {
 					)}
 				</form.Subscribe>
 			</form>
+
 			{mutation.isError && (
 				<p className="text-red-500 mt-2">
 					{(mutation.error as Error).message}

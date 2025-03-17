@@ -13,7 +13,6 @@ import CreateCardValidationSchema from '@/validations/card';
 import ApiErrorValidationSchema from '@/validations/errors';
 import FieldInfo from '@/components/FieldInfo';
 
-
 type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
 
 type CreateCardResponse = {
@@ -106,9 +105,9 @@ export default function CreateCardPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 						<FieldInfo field={field} />
 					</div>
@@ -132,6 +131,7 @@ export default function CreateCardPage() {
 				<TextInput label="Translation" name="translation" />
 				<TextInput label="Image URL" name="imageUrl" />
 				<TextInput label="Sentence" name="sentence" />
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
@@ -146,6 +146,7 @@ export default function CreateCardPage() {
 					)}
 				</form.Subscribe>
 			</form>
+
 			{mutation.isError && (
 				<p className="text-red-500 mt-2">
 					{(mutation.error as Error).message}

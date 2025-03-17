@@ -160,6 +160,7 @@ export default function FolderDetailsPage() {
 			>
 				<TextInput label="Folder Name" name="name" />
 				<TextInput label="Description" name="description" />
+
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
@@ -174,6 +175,7 @@ export default function FolderDetailsPage() {
 					)}
 				</form.Subscribe>
 			</form>
+
 			<div className="mt-6">
 				<a
 					href={`/dashboard/folders/${folderId}/cards/create`}

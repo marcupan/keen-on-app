@@ -23,8 +23,8 @@ export default function Header() {
 					Profile
 				</Link>
 				<button
-					onClick={logout}
 					className="text-sm text-red-600 underline"
+					onClick={logout}
 				>
 					Logout
 				</button>

@@ -5,6 +5,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 
 type QueryParamsType = {
 	verificationCode: string;
@@ -42,9 +43,15 @@ export default function VerifyEmailPage() {
 	}
 
 	return (
-		<div className="max-w-md mx-auto p-4 bg-white shadow mt-4">
-			<h1 className="text-2xl mb-4">Email Verified</h1>
-			<p>Your email has been successfully verified.</p>
+		<div className="max-w-md mx-auto">
+			<div className="max-w-md mx-auto p-4 bg-white shadow mt-4">
+				<h1 className="text-2xl mb-4">Email Verified</h1>
+				<p>Your email has been successfully verified.</p>
+			</div>
+
+			<p className="mt-10 text-center text-blue-500">
+				<Link href="/">Go to dashboard</Link>
+			</p>
 		</div>
 	);
 }

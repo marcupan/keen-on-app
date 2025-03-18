@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
@@ -109,41 +110,58 @@ export default function RegisterForm() {
 	}
 
 	return (
-		<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
-			<h1 className="text-2xl mb-4">Register</h1>
-			<form
-				onSubmit={(ev) => {
-					ev.preventDefault();
-					ev.stopPropagation();
+		<div className="max-w-md mx-auto">
+			<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
+				<h1 className="text-2xl mb-4">Register</h1>
+				<form
+					onSubmit={(ev) => {
+						ev.preventDefault();
+						ev.stopPropagation();
 
-					form.handleSubmit();
-				}}
-			>
-				<TextInput name="name" label="Name" />
-				<TextInput name="email" label="Email" />
-				<TextInput name="password" label="Password" type="password" />
-				<TextInput name="passwordConfirm" label="Confirm Password" type="password" />
-
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
+						form.handleSubmit();
+					}}
 				>
-					{([canSubmit, isSubmitting]) => (
-						<button
-							type="submit"
-							disabled={!canSubmit || isSubmitting}
-							className="mt-4 px-4 py-2 bg-blue-600 text-white"
-						>
-							{isSubmitting ? 'Registering...' : 'Register'}
-						</button>
-					)}
-				</form.Subscribe>
-			</form>
+					<TextInput name="name" label="Name" />
+					<TextInput name="email" label="Email" />
+					<TextInput
+						name="password"
+						label="Password"
+						type="password"
+					/>
+					<TextInput
+						name="passwordConfirm"
+						label="Confirm Password"
+						type="password"
+					/>
 
-			{mutation.isError && (
-				<p className="text-red-500 mt-2">
-					{(mutation.error as Error).message}
-				</p>
-			)}
+					<form.Subscribe
+						selector={(state) => [
+							state.canSubmit,
+							state.isSubmitting,
+						]}
+					>
+						{([canSubmit, isSubmitting]) => (
+							<button
+								type="submit"
+								disabled={!canSubmit || isSubmitting}
+								className="mt-4 px-4 py-2 bg-blue-600 text-white"
+							>
+								{isSubmitting ? 'Registering...' : 'Register'}
+							</button>
+						)}
+					</form.Subscribe>
+				</form>
+
+				{mutation.isError && (
+					<p className="text-red-500 mt-2">
+						{(mutation.error as Error).message}
+					</p>
+				)}
+			</div>
+
+			<p className="mt-10 text-center text-blue-500">
+				<Link href="/register">Register</Link>
+			</p>
 		</div>
 	);
 }

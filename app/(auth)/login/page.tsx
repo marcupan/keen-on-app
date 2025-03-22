@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useMutation } from '@tanstack/react-query';
@@ -13,15 +12,23 @@ import { z } from 'zod';
 import ApiErrorValidationSchema from '@/validations/errors';
 import LoginValidationSchema from '@/validations/login';
 import FieldInfo from '@/components/FieldInfo';
+import { useAuth } from '@/lib/auth';
+import { User } from '@/lib/types';
 
 type LoginValues = z.infer<typeof LoginValidationSchema>;
 
 type LoginResponse = {
-	access_token: string;
+	user: User;
+};
+
+type FormFieldsType = {
+	name: 'email' | 'password';
+	label: string;
+	type?: 'text' | 'password';
 };
 
 export default function LoginForm() {
-	const router = useRouter();
+	const { login } = useAuth();
 
 	const mutation = useMutation<LoginResponse, Error, LoginValues>({
 		mutationFn: async (values: LoginValues) => {
@@ -51,9 +58,7 @@ export default function LoginForm() {
 			return res.json();
 		},
 		onSuccess: (data) => {
-			console.log('Login successful, token:', data.access_token);
-
-			router.push('/dashboard');
+			login(data.user);
 		},
 	});
 
@@ -74,11 +79,7 @@ export default function LoginForm() {
 		name,
 		label,
 		type = 'text',
-	}: {
-		name: 'email' | 'password';
-		label: string;
-		type?: 'text' | 'password';
-	}) {
+	}: FormFieldsType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

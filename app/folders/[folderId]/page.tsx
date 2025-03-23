@@ -9,7 +9,7 @@ import { useForm } from '@tanstack/react-form';
 
 import CreateFolderValidationSchema from '@/validations/folder';
 
-type UpdateFolderValues = {
+type FolderType = {
 	name: string;
 	description: string;
 };
@@ -22,13 +22,11 @@ type QueryProps = {
 	folderId: string;
 };
 
-const mutationHeaders = {
-	'Content-Type': 'application/json',
-	Authorization: `Bearer ${localStorage.getItem('token')}`,
-};
-
-const queryHeaders = {
-	Authorization: `Bearer ${localStorage.getItem('token')}`,
+type FolderResponseType = {
+	status: 'success' | 'error' | 'fail';
+	data: {
+		folder: FolderType;
+	};
 };
 
 export default function FolderDetailsPage() {
@@ -38,13 +36,13 @@ export default function FolderDetailsPage() {
 
 	const queryClient = useQueryClient();
 
-	const { data, isLoading, error } = useQuery({
+	const { data, isLoading, error } = useQuery<FolderResponseType>({
 		queryKey: ['folder', folderId],
 		queryFn: async () => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
 				{
-					headers: queryHeaders,
+					credentials: 'include',
 				}
 			);
 
@@ -60,14 +58,17 @@ export default function FolderDetailsPage() {
 	const mutation = useMutation<
 		UpdateFolderResponse,
 		Error,
-		UpdateFolderValues
+		FolderType
 	>({
-		mutationFn: async (updated: UpdateFolderValues) => {
+		mutationFn: async (updated: FolderType) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
 				{
 					method: 'PATCH',
-					headers: mutationHeaders,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					credentials: 'include',
 					body: JSON.stringify(updated),
 				}
 			);
@@ -83,10 +84,12 @@ export default function FolderDetailsPage() {
 		},
 	});
 
+	const folder = data && data.data.folder;
+
 	const form = useForm({
 		defaultValues: {
-			name: '',
-			description: '',
+			name: folder ? folder.name: '',
+			description: folder ? folder.description: '',
 		},
 		validators: {
 			onChange: CreateFolderValidationSchema,
@@ -99,20 +102,20 @@ export default function FolderDetailsPage() {
 	});
 
 	useEffect(() => {
-		if (data) {
+		if (folder) {
 			form.reset({
-				name: data.name,
-				description: data.description || '',
+				name: folder ? folder.name: '',
+				description: folder ? folder.description: '',
 			});
 		}
-	}, [data, form]);
+	}, [folder, form]);
 
 	function TextInput({
 		label,
 		name,
 	}: {
 		label: string;
-		name: keyof UpdateFolderValues;
+		name: keyof FolderType;
 	}) {
 		return (
 			<form.Field name={name}>

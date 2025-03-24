@@ -22,6 +22,11 @@ type QueryProps = {
 	folderId: string;
 };
 
+type FolderInputType = {
+	label: string;
+	name: keyof FolderType;
+};
+
 type FolderResponseType = {
 	status: 'success' | 'error' | 'fail';
 	data: {
@@ -55,11 +60,7 @@ export default function FolderDetailsPage() {
 		enabled: !!folderId,
 	});
 
-	const mutation = useMutation<
-		UpdateFolderResponse,
-		Error,
-		FolderType
-	>({
+	const mutation = useMutation<UpdateFolderResponse, Error, FolderType>({
 		mutationFn: async (updated: FolderType) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
@@ -88,8 +89,8 @@ export default function FolderDetailsPage() {
 
 	const form = useForm({
 		defaultValues: {
-			name: folder ? folder.name: '',
-			description: folder ? folder.description: '',
+			name: folder ? folder.name : '',
+			description: folder ? folder.description : '',
 		},
 		validators: {
 			onChange: CreateFolderValidationSchema,
@@ -104,19 +105,13 @@ export default function FolderDetailsPage() {
 	useEffect(() => {
 		if (folder) {
 			form.reset({
-				name: folder ? folder.name: '',
-				description: folder ? folder.description: '',
+				name: folder ? folder.name : '',
+				description: folder ? folder.description : '',
 			});
 		}
 	}, [folder, form]);
 
-	function TextInput({
-		label,
-		name,
-	}: {
-		label: string;
-		name: keyof FolderType;
-	}) {
+	function TextInput({ label, name }: FolderInputType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (
@@ -181,7 +176,7 @@ export default function FolderDetailsPage() {
 
 			<div className="mt-6">
 				<a
-					href={`/dashboard/folders/${folderId}/cards/create`}
+					href={`/folders/${folderId}/cards/create`}
 					className="inline-block px-4 py-2 bg-green-600 text-white"
 				>
 					Create Card

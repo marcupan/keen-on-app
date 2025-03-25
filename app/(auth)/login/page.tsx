@@ -75,11 +75,7 @@ export default function LoginForm() {
 		},
 	});
 
-	function TextInput({
-		name,
-		label,
-		type = 'text',
-	}: FormFieldsType) {
+	function TextInput({ name, label, type = 'text' }: FormFieldsType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

@@ -19,6 +19,11 @@ type CreateFolderResponse = {
 	message: string;
 };
 
+type CardInputType = {
+	name: 'name' | 'description';
+	label: string;
+};
+
 export default function CreateFolderPage() {
 	const router = useRouter();
 
@@ -80,13 +85,7 @@ export default function CreateFolderPage() {
 		},
 	});
 
-	function TextInput({
-		label,
-		name,
-	}: {
-		label: string;
-		name: 'name' | 'description';
-	}) {
+	function TextInput({ name, label }: CardInputType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

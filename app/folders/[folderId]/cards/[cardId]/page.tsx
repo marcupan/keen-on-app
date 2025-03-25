@@ -25,6 +25,12 @@ type QueryParams = {
 	cardId: string;
 };
 
+type CardInputType = {
+	name: keyof UpdateCardValues;
+	label: string;
+	type?: 'text' | 'file';
+};
+
 const queryHeaders = {
 	Authorization: `Bearer ${localStorage.getItem('token')}`,
 };
@@ -108,13 +114,7 @@ export default function EditCardPage() {
 		}
 	}, [data, form]);
 
-	function TextInput({
-		label,
-		name,
-	}: {
-		name: keyof UpdateCardValues;
-		label: string;
-	}) {
+	function TextInput({ name, label, type = 'text' }: CardInputType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (
@@ -128,7 +128,7 @@ export default function EditCardPage() {
 						<input
 							id={field.name}
 							name={field.name}
-							type="text"
+							type={type}
 							value={field.state.value}
 							className="border p-2 w-full"
 							onBlur={field.handleBlur}
@@ -159,10 +159,10 @@ export default function EditCardPage() {
 					form.handleSubmit();
 				}}
 			>
-				<TextInput label="Word" name="word" />
-				<TextInput label="Translation" name="translation" />
-				<TextInput label="Image URL" name="imageUrl" />
-				<TextInput label="Sentence" name="sentence" />
+				<TextInput name="word" label="Word" />
+				<TextInput name="translation" label="Translation" />
+				<TextInput name="imageUrl" type="file" label="Image URL" />
+				<TextInput name="sentence" label="Sentence" />
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}

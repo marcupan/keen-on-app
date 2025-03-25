@@ -23,6 +23,11 @@ type QueryProps = {
 	folderId: string;
 };
 
+type CardInputType = {
+	name: keyof CreateCardValues;
+	label: string;
+};
+
 export default function CreateCardPage() {
 	const { folderId } = useParams<QueryProps>();
 
@@ -83,13 +88,7 @@ export default function CreateCardPage() {
 		},
 	});
 
-	function TextInput({
-		label,
-		name,
-	}: {
-		name: keyof CreateCardValues;
-		label: string;
-	}) {
+	function TextInput({ name, label }: CardInputType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

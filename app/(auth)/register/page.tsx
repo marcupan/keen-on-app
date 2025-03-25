@@ -20,6 +20,12 @@ type RegisterResponse = {
 	message: string;
 };
 
+type RegisterInputType = {
+	name: 'name' | 'email' | 'password' | 'passwordConfirm';
+	label: string;
+	type?: 'text' | 'password';
+};
+
 export default function RegisterForm() {
 	const router = useRouter();
 
@@ -74,15 +80,7 @@ export default function RegisterForm() {
 		},
 	});
 
-	function TextInput({
-		name,
-		label,
-		type = 'text',
-	}: {
-		name: 'name' | 'email' | 'password' | 'passwordConfirm';
-		label: string;
-		type?: 'text' | 'password';
-	}) {
+	function TextInput({ name, label, type = 'text' }: RegisterInputType) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

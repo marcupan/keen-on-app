@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+
+import { useParams } from 'next/navigation';
+
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
 import { z } from 'zod';
+
 import ApiErrorValidationSchema from '@/validations/errors';
 
 const GenerateCardSchema = z.object({
@@ -34,32 +37,42 @@ export default function GenerateCardPage() {
 
 	const [generatedData, setGeneratedData] = useState<GeneratedData | null>(null);
 
-	const generateMutation = useMutation<GenerateCardResponse, Error, GenerateCardValues>({
+	const generateMutation = useMutation<
+		GenerateCardResponse,
+		Error,
+		GenerateCardValues
+	>({
 		mutationFn: async (values: GenerateCardValues) => {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cards/generate`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				credentials: 'include',
-				body: JSON.stringify(values),
-			});
+			const res = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/generate`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify(values),
+				}
+			);
 
 			if (!res.ok) {
 				let errorMessage = 'Error generating card';
 				try {
 					const errorData = await res.json();
-					const parsedError = ApiErrorValidationSchema.parse(errorData);
-					errorMessage = parsedError.errors.map((err) => err.message).join(', ');
+					const parsedError =
+						ApiErrorValidationSchema.parse(errorData);
+					errorMessage = parsedError.errors
+						.map((err) => err.message)
+						.join(', ');
 				} catch {}
 				throw new Error(errorMessage);
 			}
 
 			return res.json();
 		},
-		onSuccess: (data) => {
-			console.log('Generated card:', data);
+		onSuccess: ({ data, status }) => {
+			console.log('Generated card:', data, status);
 
-			if (data.status === 'success' && data.data) {
-				setGeneratedData(data.data);
+			if (status === 'success' && data) {
+				setGeneratedData(data);
 			}
 		},
 	});

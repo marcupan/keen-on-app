@@ -16,7 +16,7 @@ type GenerateCardValues = z.infer<typeof GenerateCardSchema>;
 
 type GenerateCardResponse = {
 	status: string;
-	date: {
+	data: {
 		image: string;
 		translation: string;
 		sentence: string[];
@@ -58,8 +58,8 @@ export default function GenerateCardPage() {
 		onSuccess: (data) => {
 			console.log('Generated card:', data);
 
-			if (data.status === 'success' && data.date) {
-				setGeneratedData(data.date);
+			if (data.status === 'success' && data.data) {
+				setGeneratedData(data.data);
 			}
 		},
 	});
@@ -71,16 +71,18 @@ export default function GenerateCardPage() {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
-				body: JSON.stringify(card),
+				body: JSON.stringify(card.body),
 			});
 
 			if (!res.ok) {
 				let errorMessage = 'Error creating card';
+
 				try {
 					const errorData = await res.json();
 					const parsedError = ApiErrorValidationSchema.parse(errorData);
 					errorMessage = parsedError.errors.map((err) => err.message).join(', ');
 				} catch {}
+
 				throw new Error(errorMessage);
 			}
 
@@ -118,9 +120,9 @@ export default function GenerateCardPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
+							className="border p-2 w-full"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
-							className="border p-2 w-full"
 						/>
 					</div>
 				)}
@@ -142,17 +144,19 @@ export default function GenerateCardPage() {
 							type="file"
 							accept="image/*"
 							className="border p-2 w-full"
-							onChange={(e) => {
-								const file = e.target.files?.[0];
+							onChange={(ev) => {
+								const file = ev.target.files && ev.target.files[0];
+
 								if (file) {
 									const reader = new FileReader();
 									reader.onloadend = () => {
 										const result = reader.result as string;
-										// Remove data URL prefix if present
 										const commaIndex = result.indexOf(',');
 										const base64String = commaIndex !== -1 ? result.substring(commaIndex + 1) : result;
+
 										field.handleChange(base64String);
 									};
+
 									reader.readAsDataURL(file);
 								}
 							}}
@@ -208,7 +212,6 @@ export default function GenerateCardPage() {
 					<p className="text-red-500 mt-2">{(generateMutation.error as Error).message}</p>
 				)}
 			</div>
-			{/* Right: Generated Card Preview and Create Card Button */}
 			<div className="md:w-1/2 md:pl-4 mt-8 md:mt-0 border-l">
 				{generatedData ? (
 					<div>

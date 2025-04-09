@@ -149,9 +149,9 @@ export default function FolderDetailsPage() {
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Edit Folder</h1>
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
+				onSubmit={(ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
 
 					form.handleSubmit();
 				}}

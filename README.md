@@ -20,6 +20,7 @@ This frontend provides a **user-friendly interface** to generate and manage Chin
 - **Tailwind CSS**: Styling.
 - **TypeScript**: Type-safe development.
 - **REST API**: Fetching backend data.
+  
 
 ---
 

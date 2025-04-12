@@ -31,10 +31,6 @@ type CardInputType = {
 	type?: 'text' | 'file';
 };
 
-const queryHeaders = {
-	Authorization: `Bearer ${localStorage.getItem('token')}`,
-};
-
 export default function EditCardPage() {
 	const { folderId, cardId } = useParams<QueryParams>();
 
@@ -48,7 +44,7 @@ export default function EditCardPage() {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
 				{
-					headers: queryHeaders,
+					credentials: 'include',
 				}
 			);
 
@@ -61,16 +57,18 @@ export default function EditCardPage() {
 		enabled: !!cardId,
 	});
 
+	const cardData = data.data.card;
+
+	console.log(data.data.card);
+
 	const mutation = useMutation<UpdateCardResponse, Error, UpdateCardValues>({
 		mutationFn: async (updated: UpdateCardValues) => {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
 				{
 					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
-					},
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
 					body: JSON.stringify(updated),
 				}
 			);
@@ -88,10 +86,10 @@ export default function EditCardPage() {
 
 	const form = useForm({
 		defaultValues: {
-			word: '',
-			translation: '',
-			imageUrl: '',
-			sentence: '',
+			word: cardData.word,
+			translation: cardData.translation,
+			imageUrl: cardData.imageUrl ?? '',
+			sentence: cardData.sentence ?? '',
 		},
 		validators: {
 			onChange: CreateCardValidationSchema,
@@ -104,15 +102,15 @@ export default function EditCardPage() {
 	});
 
 	useEffect(() => {
-		if (data) {
+		if (cardData) {
 			form.reset({
-				word: data.word,
-				translation: data.translation,
-				imageUrl: data.imageUrl ?? '',
-				sentence: data.sentence ?? '',
+				word: cardData.word,
+				translation: cardData.translation,
+				imageUrl: cardData.imageUrl ?? '',
+				sentence: cardData.sentence ?? '',
 			});
 		}
-	}, [data, form]);
+	}, [cardData, form]);
 
 	function TextInput({ name, label, type = 'text' }: CardInputType) {
 		return (
@@ -152,9 +150,9 @@ export default function EditCardPage() {
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Edit Card</h1>
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
+				onSubmit={(ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
 
 					form.handleSubmit();
 				}}

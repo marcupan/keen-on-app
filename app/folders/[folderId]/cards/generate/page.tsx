@@ -71,10 +71,11 @@ export default function GenerateCardPage() {
 				} catch {
 					errorMessage = `Error: ${res.status} ${res.statusText}`;
 				}
+
 				throw new Error(errorMessage);
 			}
 
-			return res.json() as Promise<GenerateCardResponse>;
+			return res.json();
 		},
 		onSuccess: (response) => {
 			const { data, status } = response;
@@ -133,6 +134,7 @@ export default function GenerateCardPage() {
 				} catch {
 					errorMessage = `Error: ${res.status} ${res.statusText}`;
 				}
+
 				throw new Error(errorMessage);
 			}
 
@@ -185,15 +187,15 @@ export default function GenerateCardPage() {
 							name={field.name}
 							type="text"
 							value={field.state.value}
-							className="border p-2 w-full rounded shadow-sm"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
 							aria-invalid={field.state.meta.errors.length > 0}
 							aria-describedby={
 								field.state.meta.errors.length > 0
 									? `${field.name}-errors`
 									: undefined
 							}
+							className="border p-2 w-full rounded shadow-sm"
+							onBlur={field.handleBlur}
+							onChange={(e) => field.handleChange(e.target.value)}
 						/>
 
 						{field.state.meta.errors.length > 0 && (
@@ -231,6 +233,12 @@ export default function GenerateCardPage() {
 							id={field.name}
 							type="file"
 							accept="image/png, image/jpeg, image/webp"
+							aria-invalid={field.state.meta.errors.length > 0}
+							aria-describedby={
+								field.state.meta.errors.length > 0
+									? `${field.name}-errors`
+									: undefined
+							}
 							className="border p-2 w-full rounded shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
 							onBlur={field.handleBlur}
 							onChange={(ev) => {
@@ -255,12 +263,6 @@ export default function GenerateCardPage() {
 									field.handleChange('');
 								}
 							}}
-							aria-invalid={field.state.meta.errors.length > 0}
-							aria-describedby={
-								field.state.meta.errors.length > 0
-									? `${field.name}-errors`
-									: undefined
-							}
 						/>
 						{field.state.meta.errors.length > 0 && (
 							<div
@@ -290,7 +292,6 @@ export default function GenerateCardPage() {
 				word: form.state.values.word,
 				translation: generatedData.translation,
 				image: generatedData.image,
-
 				sentence: generatedData.exampleSentences.join('\n'),
 				folderId: params.folderId,
 			},
@@ -423,16 +424,16 @@ export default function GenerateCardPage() {
 						</div>
 
 						<button
-							onClick={handleCreateCard}
 							disabled={
 								createCardMutation.isPending || !params.folderId
 							}
-							className="w-full px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out mt-4"
 							title={
 								!params.folderId
 									? 'Cannot create card without a folder context'
 									: ''
 							}
+							className="w-full px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out mt-4"
+							onClick={handleCreateCard}
 						>
 							{createCardMutation.isPending
 								? 'Saving...'

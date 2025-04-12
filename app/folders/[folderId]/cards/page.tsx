@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -27,6 +27,8 @@ type CardsResponseType = {
 };
 
 export default function CardsPage() {
+	const params = useParams<{ folderId: string }>();
+
 	const router = useRouter();
 
 	const { data, isLoading, error } = useQuery<CardsResponseType, Error>({
@@ -59,7 +61,7 @@ export default function CardsPage() {
 				</h1>{' '}
 				<button
 					className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-150"
-					onClick={() => router.push('/cards/generate')}
+					onClick={() => router.push(`/folders/${params.folderId}/cards/generate`)}
 				>
 					Create New Card
 				</button>
@@ -81,7 +83,7 @@ export default function CardsPage() {
 								key={card.id}
 								className="p-4 bg-white shadow rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
 								onClick={() =>
-									router.push(`/cards/${card.id}/edit`)
+									router.push(`/folders/${params.folderId}/cards/${card.id}`)
 								}
 							>
 								{card.image && (

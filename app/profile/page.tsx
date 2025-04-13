@@ -21,9 +21,7 @@ export default function ProfilePage() {
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
 				{
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
-					},
+					credentials: 'include',
 				}
 			);
 

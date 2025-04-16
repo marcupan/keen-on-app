@@ -2,56 +2,48 @@
 
 import React from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useProfile } from '@/hooks/useProfile';
+import { Card } from '@/components/ui/Card';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-import { useAuth } from '@/lib/auth';
-
-interface UserProfile {
-	id: string;
-	name: string;
-	email: string;
-}
-
-export default function ProfilePage() {
-	const { isAuthenticated } = useAuth();
-
-	const { data, isLoading, error } = useQuery<UserProfile>({
-		queryKey: ['profile'],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
-				{
-					credentials: 'include',
-				}
-			);
-
-			if (!res.ok) {
-				throw new Error('Error fetching profile');
-			}
-
-			return res.json();
-		},
-		enabled: isAuthenticated,
-	});
+function ProfileContent() {
+	const { data, isLoading, error } = useProfile();
 
 	if (isLoading) {
-		return <p>Loading profile...</p>;
+		return <LoadingSpinner />;
 	}
 
 	if (error) {
-		return <p className="text-red-500">Error loading profile.</p>;
+		return <ErrorMessage message="Error loading profile." />;
+	}
+
+	if (!data) {
+		return null;
 	}
 
 	return (
-		<div className="max-w-md mx-auto p-4 bg-white shadow mt-4">
+		<div>
 			<h1 className="text-2xl mb-4">Profile</h1>
-
-			{data && (
-				<div>
-					<p className="mb-2">Name: {data.name}</p>
-					<p className="mb-2">Email: {data.email}</p>
-				</div>
-			)}
+			<div className="space-y-2">
+				<p className="mb-2">
+					<span className="font-medium">Name:</span> {data.name}
+				</p>
+				<p className="mb-2">
+					<span className="font-medium">Email:</span> {data.email}
+				</p>
+			</div>
 		</div>
+	);
+}
+
+export default function ProfilePage() {
+	return (
+		<ErrorBoundary>
+			<Card>
+				<ProfileContent />
+			</Card>
+		</ErrorBoundary>
 	);
 }

@@ -11,7 +11,7 @@ import { z } from 'zod';
 
 import ApiErrorValidationSchema from '@/validations/errors';
 import LoginValidationSchema from '@/validations/login';
-import FieldInfo from '@/components/FieldInfo';
+import FieldInfo from '@/components/ui/FieldInfo';
 import { useAuth } from '@/lib/auth';
 import { User } from '@/lib/types';
 

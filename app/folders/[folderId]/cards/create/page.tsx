@@ -11,7 +11,7 @@ import { z } from 'zod';
 
 import CreateCardValidationSchema from '@/validations/card';
 import ApiErrorValidationSchema from '@/validations/errors';
-import FieldInfo from '@/components/FieldInfo';
+import FieldInfo from '@/components/ui/FieldInfo';
 
 type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
 

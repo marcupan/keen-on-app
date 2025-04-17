@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth';
 export function useProfile() {
 	const { isAuthenticated } = useAuth();
 
-	return useQuery<UserProfile>({
+	return useQuery<{ data: { user: UserProfile } }>({
 		queryKey: ['profile'],
 		queryFn: () => fetchApi('/api/user/profile'),
 		enabled: isAuthenticated,

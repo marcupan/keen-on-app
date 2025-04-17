@@ -12,7 +12,7 @@ import { z } from 'zod';
 
 import RegisterValidationSchema from '@/validations/register';
 import ApiErrorValidationSchema from '@/validations/errors';
-import FieldInfo from '@/components/FieldInfo';
+import FieldInfo from '@/components/ui/FieldInfo';
 
 type RegisterValues = z.infer<typeof RegisterValidationSchema>;
 

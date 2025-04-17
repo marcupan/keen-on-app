@@ -28,10 +28,10 @@ function ProfileContent() {
 			<h1 className="text-2xl mb-4">Profile</h1>
 			<div className="space-y-2">
 				<p className="mb-2">
-					<span className="font-medium">Name:</span> {data.name}
+					<span className="font-medium">Name:</span> {data.data.user.name}
 				</p>
 				<p className="mb-2">
-					<span className="font-medium">Email:</span> {data.email}
+					<span className="font-medium">Email:</span> {data.data.user.email}
 				</p>
 			</div>
 		</div>

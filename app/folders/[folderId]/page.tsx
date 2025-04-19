@@ -7,32 +7,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
+import {
+	FolderInputType,
+	FolderResponseType,
+	FolderType,
+	QueryProps,
+	UpdateFolderResponse,
+} from '@/types/folder';
 import CreateFolderValidationSchema from '@/validations/folder';
-
-type FolderType = {
-	name: string;
-	description: string;
-};
-
-type UpdateFolderResponse = {
-	message: string;
-};
-
-type QueryProps = {
-	folderId: string;
-};
-
-type FolderInputType = {
-	label: string;
-	name: keyof FolderType;
-};
-
-type FolderResponseType = {
-	status: 'success' | 'error' | 'fail';
-	data: {
-		folder: FolderType;
-	};
-};
 
 export default function FolderDetailsPage() {
 	const { folderId } = useParams<QueryProps>();

@@ -1,9 +1,19 @@
 import { z } from 'zod';
 
+export type QueryProps = {
+	folderId: string;
+};
+
 export type FolderType = {
-	id: string;
 	name: string;
 	description?: string;
+};
+
+export type FolderResponseType = {
+	status: 'success' | 'error' | 'fail';
+	data: {
+		folder: FolderType;
+	};
 };
 
 export type FoldersResponseType = {
@@ -29,4 +39,13 @@ export type CreateFolderResponse = {
 	data: {
 		folder: FolderType;
 	};
+};
+
+export type UpdateFolderResponse = {
+	message: string;
+};
+
+export type FolderInputType = {
+	label: string;
+	name: keyof FolderType;
 };

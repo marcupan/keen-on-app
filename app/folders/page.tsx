@@ -21,7 +21,7 @@ export default function FoldersPage() {
 
 			<div className="space-y-2">
 				{folders.map((folder) => (
-					<FolderItem key={folder.id} folder={folder} />
+					<FolderItem key={folder.name} folder={folder} />
 				))}
 			</div>
 

@@ -11,6 +11,7 @@ export default function CreateFolderPage() {
 
 	const handleSubmit = async (values: CreateFolderValues) => {
 		await mutation.mutateAsync(values);
+
 		router.push('/folders');
 	};
 

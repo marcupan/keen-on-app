@@ -4,70 +4,22 @@ import React, { useEffect } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import {
-	FolderInputType,
-	FolderResponseType,
-	FolderType,
-	QueryProps,
-	UpdateFolderResponse,
-} from '@/types/folder';
 import CreateFolderValidationSchema from '@/validations/folder';
 
+import { useFolder } from '@/hooks/useFolder';
+import TextInput from '@/components/ui/TextInput';
+import { FolderQueryProps } from '@/types/folder';
+
 export default function FolderDetailsPage() {
-	const { folderId } = useParams<QueryProps>();
+	const { folderId } = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 
-	const queryClient = useQueryClient();
+	const { query, mutation } = useFolder(folderId);
 
-	const { data, isLoading, error } = useQuery<FolderResponseType>({
-		queryKey: ['folder', folderId],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
-				{
-					credentials: 'include',
-				}
-			);
-
-			if (!res.ok) {
-				throw new Error('Error fetching folder');
-			}
-
-			return res.json();
-		},
-		enabled: !!folderId,
-	});
-
-	const mutation = useMutation<UpdateFolderResponse, Error, FolderType>({
-		mutationFn: async (updated: FolderType) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
-				{
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
-					body: JSON.stringify(updated),
-				}
-			);
-
-			if (!res.ok) {
-				throw new Error('Error updating folder');
-			}
-
-			return res.json();
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['folder', folderId] });
-		},
-	});
-
-	const folder = data && data.data.folder;
+	const folder = query.data?.data.folder;
 
 	const form = useForm({
 		defaultValues: {
@@ -87,43 +39,17 @@ export default function FolderDetailsPage() {
 	useEffect(() => {
 		if (folder) {
 			form.reset({
-				name: folder ? folder.name : '',
-				description: folder ? folder.description : '',
+				name: folder.name,
+				description: folder.description,
 			});
 		}
 	}, [folder, form]);
 
-	function TextInput({ label, name }: FolderInputType) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type="text"
-							value={field.state.value}
-							className="border p-2 w-full"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-					</div>
-				)}
-			</form.Field>
-		);
-	}
-
-	if (isLoading) {
+	if (query.isLoading) {
 		return <p>Loading folder...</p>;
 	}
 
-	if (error) {
+	if (query.error) {
 		return <p className="text-red-500">Error loading folder.</p>;
 	}
 
@@ -134,12 +60,32 @@ export default function FolderDetailsPage() {
 				onSubmit={(ev) => {
 					ev.preventDefault();
 					ev.stopPropagation();
-
 					form.handleSubmit();
 				}}
 			>
-				<TextInput label="Folder Name" name="name" />
-				<TextInput label="Description" name="description" />
+				<form.Field name="name">
+					{(field) => (
+						<TextInput
+							label="Folder Name"
+							name={field.name}
+							value={field.state.value}
+							onChange={field.handleChange}
+							onBlur={field.handleBlur}
+						/>
+					)}
+				</form.Field>
+
+				<form.Field name="description">
+					{(field) => (
+						<TextInput
+							label="Description"
+							name={field.name}
+							value={field.state.value || ''}
+							onChange={field.handleChange}
+							onBlur={field.handleBlur}
+						/>
+					)}
+				</form.Field>
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type QueryProps = {
+export type FolderQueryProps = {
 	folderId: string;
 };
 

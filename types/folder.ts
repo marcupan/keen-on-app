@@ -32,20 +32,6 @@ export const createFolderSchema = z.object({
 	description: z.string().optional(),
 });
 
-export type CreateFolderInput = z.infer<typeof createFolderSchema>;
-
-export type CreateFolderResponse = {
-	status: 'success' | 'error';
-	data: {
-		folder: FolderType;
-	};
-};
-
 export type UpdateFolderResponse = {
 	message: string;
-};
-
-export type FolderInputType = {
-	label: string;
-	name: keyof FolderType;
 };

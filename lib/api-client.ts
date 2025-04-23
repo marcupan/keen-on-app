@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { config } from '@/lib/config';
 
 export class ApiError extends Error {
 	constructor(public errors: string[]) {
@@ -9,8 +9,8 @@ export class ApiError extends Error {
 export async function fetchApi<T>(
 	endpoint: string,
 	options: RequestInit = {}
-): Promise<T> {
-	const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+): Promise<T | null> {
+	const res = await fetch(`${config.apiBaseUrl}${endpoint}`, {
 		...options,
 		credentials: 'include',
 		headers: {
@@ -21,18 +21,27 @@ export async function fetchApi<T>(
 
 	if (!res.ok) {
 		let errors = ['An error occurred'];
+
 		try {
 			const errorData = await res.json();
-			if (errorData.errors) {
+
+			if (errorData && Array.isArray(errorData.errors)) {
 				errors = errorData.errors.map(
-					(err: { message: string }) => err.message
+					(err: { message: string }) =>
+						err.message || 'Unknown error detail'
 				);
+			} else if (errorData && errorData.message) {
+				errors = [errorData.message];
 			}
 		} catch {
-			// Use a default error message
+			errors = [`HTTP Error: ${res.status} ${res.statusText}`];
 		}
 
 		throw new ApiError(errors);
+	}
+
+	if (res.status === 204) {
+		return null;
 	}
 
 	return res.json();

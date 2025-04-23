@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 export type FolderQueryProps = {
 	folderId: string;
 };
@@ -26,11 +24,6 @@ export type FoldersResponseType = {
 		take: number;
 	};
 };
-
-export const createFolderSchema = z.object({
-	name: z.string().min(1, 'Folder name is required'),
-	description: z.string().optional(),
-});
 
 export type UpdateFolderResponse = {
 	message: string;

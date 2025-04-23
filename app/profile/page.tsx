@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ProtectedPage from '@/components/ProtectedPage';
 
 function ProfileContent() {
 	const { data, isLoading, error } = useProfile();
@@ -28,10 +29,12 @@ function ProfileContent() {
 			<h1 className="text-2xl mb-4">Profile</h1>
 			<div className="space-y-2">
 				<p className="mb-2">
-					<span className="font-medium">Name:</span> {data.data.user.name}
+					<span className="font-medium">Name:</span>{' '}
+					{data.data.user.name}
 				</p>
 				<p className="mb-2">
-					<span className="font-medium">Email:</span> {data.data.user.email}
+					<span className="font-medium">Email:</span>{' '}
+					{data.data.user.email}
 				</p>
 			</div>
 		</div>
@@ -41,9 +44,11 @@ function ProfileContent() {
 export default function ProfilePage() {
 	return (
 		<ErrorBoundary>
-			<Card>
-				<ProfileContent />
-			</Card>
+			<ProtectedPage>
+				<Card>
+					<ProfileContent />
+				</Card>
+			</ProtectedPage>
 		</ErrorBoundary>
 	);
 }

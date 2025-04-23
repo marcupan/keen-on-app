@@ -1,61 +1,81 @@
-'use client';
+import React, {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+	ReactNode,
+} from 'react';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User } from './types';
 
-import { useRouter } from 'next/navigation';
+interface AuthContextType {
+	user: User | null;
+	isAuthenticated: boolean;
+	isLoading: boolean;
+	login: (user: User) => void;
+	logout: () => void;
+}
 
-import { AuthContextType, User } from './types';
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AuthContext = createContext<AuthContextType>({
-	user: null,
-	isAuthenticated: false,
-	login: () => {},
-	logout: () => {},
-});
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 
-	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const storedUser = localStorage.getItem('user');
+		async function fetchUser() {
+			try {
+				setIsLoading(true);
+				const res = await fetch('/api/auth/me', {
+					credentials: 'include',
+				});
 
-		if (storedUser) {
-			setUser(JSON.parse(storedUser));
+				if (!res.ok) {
+					setUser(null);
+				} else {
+					const data = await res.json();
+
+					setUser(data.user);
+				}
+			} catch {
+				setUser(null);
+			} finally {
+				setIsLoading(false);
+			}
 		}
+
+		fetchUser();
 	}, []);
 
-	const login = (currentUser: User) => {
-		setUser(currentUser);
-
-		localStorage.setItem('user', JSON.stringify(currentUser));
-
-		router.push('/dashboard');
+	const login = (user: User) => {
+		setUser(user);
 	};
 
 	const logout = () => {
-		setUser(null);
-
-		localStorage.removeItem('user');
-
-		router.push('/login');
+		fetch('/api/auth/logout', {
+			method: 'POST',
+			credentials: 'include',
+		}).finally(() => setUser(null));
 	};
+
+	const isAuthenticated = !!user;
 
 	return (
 		<AuthContext.Provider
-			value={{
-				user,
-				isAuthenticated: !!user,
-				login,
-				logout,
-			}}
+			value={{ user, isAuthenticated, isLoading, login, logout }}
 		>
 			{children}
 		</AuthContext.Provider>
 	);
 }
 
-export function useAuth() {
-	return useContext(AuthContext);
+export function useAuth(): AuthContextType {
+	const context = useContext(AuthContext);
+
+	if (!context) {
+		throw new Error('useAuth must be used within an AuthProvider');
+	}
+
+	return context;
 }

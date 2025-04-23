@@ -10,7 +10,7 @@ export const FolderItem = ({ folder }: FolderItemProps) => {
 	return (
 		<div className="p-2 bg-white shadow">
 			<Link
-				href={`/folders/${folder.id}`}
+				href={`/folders/${folder.name}`}
 				className="font-semibold underline"
 			>
 				{folder.name}

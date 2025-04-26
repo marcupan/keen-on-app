@@ -1,11 +1,14 @@
 'use client';
 
+import React from 'react';
+
 import { useRouter } from 'next/navigation';
 
 import { useFolders } from '@/hooks/useFolders';
 import { FolderItem } from '@/components/FolderItem';
+import ProtectedPage from '@/components/ProtectedPage';
 
-export default function FoldersPage() {
+function FoldersContent() {
 	const router = useRouter();
 	const { data, isLoading, error } = useFolders();
 
@@ -32,5 +35,13 @@ export default function FoldersPage() {
 				Create Folder
 			</button>
 		</div>
+	);
+}
+
+export default function FoldersPage() {
+	return (
+		<ProtectedPage>
+			<FoldersContent />
+		</ProtectedPage>
 	);
 }

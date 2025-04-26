@@ -2,7 +2,7 @@ import { useForm } from '@tanstack/react-form';
 
 import CreateFolderValidationSchema from '@/validations/folder';
 import FieldInfo from '@/components/ui/FieldInfo';
-import { type CreateFolderValues } from '@/hooks/useCreateFolder';
+import { CreateFolderValues } from '@/types/folder';
 
 type CreateFolderFormProps = {
 	onSubmit: (values: CreateFolderValues) => Promise<void>;
@@ -14,7 +14,10 @@ type FormFieldProps = {
 	label: string;
 };
 
-export function CreateFolderForm({ onSubmit, isSubmitting }: CreateFolderFormProps) {
+export function CreateFolderForm({
+	onSubmit,
+	isSubmitting,
+}: CreateFolderFormProps) {
 	const form = useForm({
 		defaultValues: {
 			name: '',
@@ -66,9 +69,7 @@ export function CreateFolderForm({ onSubmit, isSubmitting }: CreateFolderFormPro
 			<FormField label="Folder Name" name="name" />
 			<FormField label="Description" name="description" />
 
-			<form.Subscribe
-				selector={(state) => [state.canSubmit]}
-			>
+			<form.Subscribe selector={(state) => [state.canSubmit]}>
 				{([canSubmit]) => (
 					<button
 						type="submit"

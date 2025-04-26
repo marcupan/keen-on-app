@@ -12,6 +12,7 @@ import { z } from 'zod';
 import CreateCardValidationSchema from '@/validations/card';
 import ApiErrorValidationSchema from '@/validations/errors';
 import FieldInfo from '@/components/ui/FieldInfo';
+import ProtectedPage from '@/components/ProtectedPage';
 
 type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
 
@@ -28,7 +29,7 @@ type CardInputType = {
 	label: string;
 };
 
-export default function CreateCardPage() {
+function CreateCardContent() {
 	const { folderId } = useParams<QueryProps>();
 
 	const router = useRouter();
@@ -54,7 +55,8 @@ export default function CreateCardPage() {
 
 				try {
 					const errorData = await res.json();
-					const parsedError = ApiErrorValidationSchema.parse(errorData);
+					const parsedError =
+						ApiErrorValidationSchema.parse(errorData);
 
 					errorMessage = parsedError.errors
 						.map((err) => err.message)
@@ -152,5 +154,13 @@ export default function CreateCardPage() {
 				</p>
 			)}
 		</div>
+	);
+}
+
+export default function CreateCardPage() {
+	return (
+		<ProtectedPage>
+			<CreateCardContent />
+		</ProtectedPage>
 	);
 }

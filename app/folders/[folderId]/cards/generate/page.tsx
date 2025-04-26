@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import ApiErrorValidationSchema from '@/validations/errors';
+import ProtectedPage from '@/components/ProtectedPage';
 
 const GenerateCardSchema = z.object({
 	word: z.string().min(1, 'Word is required'),
@@ -34,7 +35,7 @@ type GeneratedData = {
 	exampleSentences: string[];
 };
 
-export default function GenerateCardPage() {
+function GenerateCardContent() {
 	const params = useParams();
 
 	const [generatedData, setGeneratedData] = useState<GeneratedData | null>(
@@ -456,5 +457,13 @@ export default function GenerateCardPage() {
 				)}
 			</div>
 		</div>
+	);
+}
+
+export default function GenerateCardPage() {
+	return (
+		<ProtectedPage>
+			<GenerateCardContent />
+		</ProtectedPage>
 	);
 }

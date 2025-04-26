@@ -6,7 +6,6 @@ import { useProfile } from '@/hooks/useProfile';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ProtectedPage from '@/components/ProtectedPage';
 
 function ProfileContent() {
@@ -43,12 +42,10 @@ function ProfileContent() {
 
 export default function ProfilePage() {
 	return (
-		<ErrorBoundary>
-			<ProtectedPage>
-				<Card>
-					<ProfileContent />
-				</Card>
-			</ProtectedPage>
-		</ErrorBoundary>
+		<ProtectedPage>
+			<Card>
+				<ProfileContent />
+			</Card>
+		</ProtectedPage>
 	);
 }

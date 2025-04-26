@@ -1,11 +1,15 @@
 'use client';
 
+import React from 'react'
+
 import { useRouter } from 'next/navigation';
 
-import { CreateFolderValues, useCreateFolder } from '@/hooks/useCreateFolder';
+import { useCreateFolder } from '@/hooks/useCreateFolder';
 import { CreateFolderForm } from '@/components/CreateFolderForm';
+import { CreateFolderValues } from '@/types/folder';
+import ProtectedPage from '@/components/ProtectedPage';
 
-export default function CreateFolderPage() {
+function CreateFolderContent() {
 	const router = useRouter();
 	const mutation = useCreateFolder();
 
@@ -25,10 +29,16 @@ export default function CreateFolderPage() {
 			/>
 
 			{mutation.isError && (
-				<p className="text-red-500 mt-2">
-					{mutation.error.message}
-				</p>
+				<p className="text-red-500 mt-2">{mutation.error.message}</p>
 			)}
 		</div>
+	);
+}
+
+export default function CreateFolderPage() {
+	return (
+		<ProtectedPage>
+			<CreateFolderContent />
+		</ProtectedPage>
 	);
 }

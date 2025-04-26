@@ -11,8 +11,9 @@ import CreateFolderValidationSchema from '@/validations/folder';
 import { useFolder } from '@/hooks/useFolder';
 import TextInput from '@/components/ui/TextInput';
 import { FolderQueryProps } from '@/types/folder';
+import ProtectedPage from '@/components/ProtectedPage';
 
-export default function FolderDetailsPage() {
+function FolderDetailsContent() {
 	const { folderId } = useParams<FolderQueryProps>();
 
 	const router = useRouter();
@@ -111,5 +112,13 @@ export default function FolderDetailsPage() {
 				</a>
 			</div>
 		</div>
+	);
+}
+
+export default function FolderDetailsPage() {
+	return (
+		<ProtectedPage>
+			<FolderDetailsContent />
+		</ProtectedPage>
 	);
 }

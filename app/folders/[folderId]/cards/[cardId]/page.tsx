@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
 import CreateCardValidationSchema from '@/validations/card';
+import ProtectedPage from '@/components/ProtectedPage';
 
 type UpdateCardValues = {
 	word: string;
@@ -31,7 +32,7 @@ type CardInputType = {
 	type?: 'text' | 'file';
 };
 
-export default function EditCardPage() {
+function EditCardContent() {
 	const { folderId, cardId } = useParams<QueryParams>();
 
 	const router = useRouter();
@@ -177,5 +178,13 @@ export default function EditCardPage() {
 				</form.Subscribe>
 			</form>
 		</div>
+	);
+}
+
+export default function EditCardPage() {
+	return (
+		<ProtectedPage>
+			<EditCardContent />
+		</ProtectedPage>
 	);
 }

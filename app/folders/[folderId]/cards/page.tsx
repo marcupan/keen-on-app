@@ -5,6 +5,7 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
+import ProtectedPage from '@/components/ProtectedPage';
 
 type CardType = {
 	id: string;
@@ -26,7 +27,7 @@ type CardsResponseType = {
 	};
 };
 
-export default function CardsPage() {
+function CardsContent() {
 	const params = useParams<{ folderId: string }>();
 
 	const router = useRouter();
@@ -61,7 +62,11 @@ export default function CardsPage() {
 				</h1>{' '}
 				<button
 					className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-150"
-					onClick={() => router.push(`/folders/${params.folderId}/cards/generate`)}
+					onClick={() =>
+						router.push(
+							`/folders/${params.folderId}/cards/generate`
+						)
+					}
 				>
 					Create New Card
 				</button>
@@ -83,7 +88,9 @@ export default function CardsPage() {
 								key={card.id}
 								className="p-4 bg-white shadow rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
 								onClick={() =>
-									router.push(`/folders/${params.folderId}/cards/${card.id}`)
+									router.push(
+										`/folders/${params.folderId}/cards/${card.id}`
+									)
 								}
 							>
 								{card.image && (
@@ -124,5 +131,13 @@ export default function CardsPage() {
 				</div>
 			)}
 		</div>
+	);
+}
+
+export default function CardsPage() {
+	return (
+		<ProtectedPage>
+			<CardsContent />
+		</ProtectedPage>
 	);
 }

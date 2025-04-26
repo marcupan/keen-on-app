@@ -115,7 +115,11 @@ export default function LoginForm() {
 					}}
 				>
 					<TextInput name="email" label="Email" />
-					<TextInput name="password" label="Password" type="password" />
+					<TextInput
+						name="password"
+						label="Password"
+						type="password"
+					/>
 
 					<form.Subscribe
 						selector={(state) => [

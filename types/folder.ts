@@ -1,3 +1,7 @@
+import { z } from 'zod';
+
+import CreateFolderValidationSchema from '@/validations/folder';
+
 export type FolderQueryProps = {
 	folderId: string;
 };
@@ -23,6 +27,12 @@ export type FoldersResponseType = {
 		skip: number;
 		take: number;
 	};
+};
+
+export type CreateFolderValues = z.infer<typeof CreateFolderValidationSchema>;
+
+export type CreateFolderResponse = {
+	message: string;
 };
 
 export type UpdateFolderResponse = {

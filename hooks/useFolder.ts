@@ -5,51 +5,52 @@ import {
 	FolderType,
 	UpdateFolderResponse,
 } from '@/types/folder';
+import { fetchApi } from '@/lib/api-client';
 
 export function useFolder(folderId: string | undefined) {
 	const queryClient = useQueryClient();
 
 	const query = useQuery<FolderResponseType>({
 		queryKey: ['folder', folderId],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
-				{
-					credentials: 'include',
-				}
+		queryFn: async (): Promise<FolderResponseType> => {
+			const result = await fetchApi<FolderResponseType>(
+				`/api/folders/${folderId}`
 			);
 
-			if (!res.ok) {
-				throw new Error('Error fetching folder');
+			if (result === null) {
+				throw new Error(
+					`Folder data for ID ${folderId} is null or not found.`
+				);
 			}
 
-			return res.json();
+			return result;
 		},
 		enabled: !!folderId,
 	});
 
 	const mutation = useMutation<UpdateFolderResponse, Error, FolderType>({
-		mutationFn: async (updated: FolderType) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/folders/${folderId}`,
+		mutationFn: async (
+			updated: FolderType
+		): Promise<UpdateFolderResponse> => {
+			const result = await fetchApi<UpdateFolderResponse>(
+				`/api/folders/${folderId}`,
 				{
 					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
 					body: JSON.stringify(updated),
 				}
 			);
 
-			if (!res.ok) {
-				throw new Error('Error updating folder');
+			if (result === null) {
+				throw new Error(
+					`Update operation for folder ID ${folderId} returned no content.`
+				);
 			}
 
-			return res.json();
+			return result;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['folder', folderId] });
+			queryClient.invalidateQueries({ queryKey: ['folders'] });
 		},
 	});
 

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchApi } from '@/lib/api-client';
-import type { UserProfile } from '@/types/user';
+import type { UserProfile, UserResponseType } from '@/types/user';
 import { useAuth } from '@/lib/auth';
 
 export function useProfile() {
@@ -9,7 +9,17 @@ export function useProfile() {
 
 	return useQuery<{ data: { user: UserProfile } }>({
 		queryKey: ['profile'],
-		queryFn: () => fetchApi('/api/user/profile'),
+		queryFn: async () => {
+			const result = await fetchApi<UserResponseType | null>(
+				'/api/user/profile'
+			);
+
+			if (result === null) {
+				throw new Error('Profile data is null');
+			}
+
+			return result;
+		},
 		enabled: isAuthenticated,
 	});
 }

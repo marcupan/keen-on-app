@@ -6,29 +6,11 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
 import ProtectedPage from '@/components/ProtectedPage';
-
-type CardType = {
-	id: string;
-	word: string;
-	translation: string;
-	image?: string;
-	createdAt?: string;
-	updatedAt?: string;
-};
-
-type CardsResponseType = {
-	status: 'success' | 'error' | 'fail';
-	data: {
-		cards: CardType[];
-	};
-	meta: {
-		skip: number;
-		take: number;
-	};
-};
+import { FolderQueryProps } from '@/types/folder';
+import { CardsResponseType } from '@/types/card';
 
 function CardsContent() {
-	const params = useParams<{ folderId: string }>();
+	const params = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 

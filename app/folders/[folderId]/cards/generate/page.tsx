@@ -6,34 +6,15 @@ import { useParams } from 'next/navigation';
 
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
-import { z } from 'zod';
 
+import {
+	GenerateCardResponse,
+	GenerateCardValues,
+	GeneratedData,
+} from '@/types/card';
+import { GenerateCardValidationSchema } from '@/validations/card';
 import ApiErrorValidationSchema from '@/validations/errors';
 import ProtectedPage from '@/components/ProtectedPage';
-
-const GenerateCardSchema = z.object({
-	word: z.string().min(1, 'Word is required'),
-	imageBase64: z.string().min(1, 'Image selection is required'),
-});
-
-type GenerateCardValues = z.infer<typeof GenerateCardSchema>;
-
-type GenerateCardResponse = {
-	status: string;
-	data: {
-		image: string;
-		translation: string;
-		characterBreakdown: string[];
-		exampleSentences: string[];
-	};
-};
-
-type GeneratedData = {
-	image: string;
-	translation: string;
-	characterBreakdown: string[];
-	exampleSentences: string[];
-};
 
 function GenerateCardContent() {
 	const params = useParams();
@@ -158,7 +139,7 @@ function GenerateCardContent() {
 			imageBase64: '',
 		},
 		validators: {
-			onChange: GenerateCardSchema,
+			onChange: GenerateCardValidationSchema,
 		},
 		onSubmit: async ({ value }) => {
 			setGeneratedData(null);

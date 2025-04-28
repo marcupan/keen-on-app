@@ -7,33 +7,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import CreateCardValidationSchema from '@/validations/card';
+import {
+	CardInputType,
+	CardQueryParams,
+	UpdateCardResponse,
+	UpdateCardValues,
+} from '@/types/card';
+import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
 
-type UpdateCardValues = {
-	word: string;
-	translation: string;
-	imageUrl: string;
-	sentence: string;
-};
-
-type UpdateCardResponse = {
-	message: string;
-};
-
-type QueryParams = {
-	folderId: string;
-	cardId: string;
-};
-
-type CardInputType = {
-	name: keyof UpdateCardValues;
-	label: string;
-	type?: 'text' | 'file';
-};
-
 function EditCardContent() {
-	const { folderId, cardId } = useParams<QueryParams>();
+	const { folderId, cardId } = useParams<CardQueryParams>();
 
 	const router = useRouter();
 
@@ -113,7 +97,11 @@ function EditCardContent() {
 		}
 	}, [cardData, form]);
 
-	function TextInput({ name, label, type = 'text' }: CardInputType) {
+	function TextInput({
+		name,
+		label,
+		type = 'text',
+	}: CardInputType<UpdateCardValues>) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

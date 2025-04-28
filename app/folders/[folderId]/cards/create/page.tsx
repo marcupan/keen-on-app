@@ -7,30 +7,19 @@ import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import { z } from 'zod';
-
-import CreateCardValidationSchema from '@/validations/card';
+import {
+	CardInputType,
+	CreateCardResponse,
+	CreateCardValues,
+} from '@/types/card';
+import { CreateCardValidationSchema } from '@/validations/card';
 import ApiErrorValidationSchema from '@/validations/errors';
-import FieldInfo from '@/components/ui/FieldInfo';
 import ProtectedPage from '@/components/ProtectedPage';
-
-type CreateCardValues = z.infer<typeof CreateCardValidationSchema>;
-
-type CreateCardResponse = {
-	message: string;
-};
-
-type QueryProps = {
-	folderId: string;
-};
-
-type CardInputType = {
-	name: keyof CreateCardValues;
-	label: string;
-};
+import FieldInfo from '@/components/ui/FieldInfo';
+import { FolderQueryProps } from '@/types/folder';
 
 function CreateCardContent() {
-	const { folderId } = useParams<QueryProps>();
+	const { folderId } = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 
@@ -90,7 +79,7 @@ function CreateCardContent() {
 		},
 	});
 
-	function TextInput({ name, label }: CardInputType) {
+	function TextInput({ name, label }: CardInputType<CreateCardValues>) {
 		return (
 			<form.Field name={name}>
 				{(field) => (

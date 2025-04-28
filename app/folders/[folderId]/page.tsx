@@ -7,11 +7,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 
 import CreateFolderValidationSchema from '@/validations/folder';
-
-import { useFolder } from '@/hooks/useFolder';
-import TextInput from '@/components/ui/TextInput';
 import { FolderQueryProps } from '@/types/folder';
 import ProtectedPage from '@/components/ProtectedPage';
+import TextInput from '@/components/ui/TextInput';
+import { useFolder } from '@/hooks/useFolder';
 
 function FolderDetailsContent() {
 	const { folderId } = useParams<FolderQueryProps>();

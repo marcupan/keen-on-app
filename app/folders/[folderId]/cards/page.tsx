@@ -5,6 +5,7 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
+
 import ProtectedPage from '@/components/ProtectedPage';
 import { FolderQueryProps } from '@/types/folder';
 import { CardsResponseType } from '@/types/card';

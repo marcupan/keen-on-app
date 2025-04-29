@@ -4,45 +4,26 @@ import React from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { useQuery } from '@tanstack/react-query';
-
+import { useCards } from '@/hooks/useCards';
 import ProtectedPage from '@/components/ProtectedPage';
 import { FolderQueryProps } from '@/types/folder';
-import { CardsResponseType } from '@/types/card';
+import { CardType } from '@/types/card';
 
 function CardsContent() {
 	const params = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 
-	const { data, isLoading, error } = useQuery<CardsResponseType, Error>({
-		queryKey: ['cards'],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards`,
-				{
-					credentials: 'include',
-				}
-			);
+	const { data, isLoading, error } = useCards(params.folderId);
 
-			if (!res.ok) {
-				throw new Error(
-					`Error fetching cards: ${res.status} ${res.statusText}`
-				);
-			}
-
-			return res.json();
-		},
-	});
-
-	const cards = data?.data?.cards ?? [];
+	const cards: CardType[] = data?.data?.cards ?? [];
 
 	return (
 		<div className="container mx-auto p-4">
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="text-3xl font-semibold text-gray-800">
-					My Cards
-				</h1>{' '}
+					Cards in Folder
+				</h1>
 				<button
 					className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-150"
 					onClick={() =>
@@ -108,7 +89,7 @@ function CardsContent() {
 						))
 					) : (
 						<p className="text-gray-500 col-span-full text-center py-10">
-							You haven&#39;t created any cards yet.
+							No cards found in this folder. Add one!
 						</p>
 					)}
 				</div>

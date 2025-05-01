@@ -14,6 +14,13 @@ export type CardType = {
 	updatedAt?: string;
 };
 
+export type CardResponse = {
+	status: 'success' | 'error' | 'fail';
+	data: {
+		card: CardType;
+	};
+}
+
 export type CardsResponseType = {
 	status: 'success' | 'error' | 'fail';
 	data: {

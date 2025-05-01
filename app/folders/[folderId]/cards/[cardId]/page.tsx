@@ -4,77 +4,28 @@ import React, { useEffect } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import {
-	CardInputType,
-	CardQueryParams,
-	UpdateCardResponse,
-	UpdateCardValues,
-} from '@/types/card';
+import { CardInputType, CardQueryParams, UpdateCardValues } from '@/types/card';
 import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
+import { useCard } from '@/hooks/useCard';
 
 function EditCardContent() {
 	const { folderId, cardId } = useParams<CardQueryParams>();
 
 	const router = useRouter();
 
-	const queryClient = useQueryClient();
+	const { query: { data, isLoading, error }, mutation } = useCard(cardId);
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ['card', cardId],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
-				{
-					credentials: 'include',
-				}
-			);
-
-			if (!res.ok) {
-				throw new Error('Error fetching card');
-			}
-
-			return res.json();
-		},
-		enabled: !!cardId,
-	});
-
-	const cardData = data.data.card;
-
-	console.log(data.data.card);
-
-	const mutation = useMutation<UpdateCardResponse, Error, UpdateCardValues>({
-		mutationFn: async (updated: UpdateCardValues) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/${cardId}`,
-				{
-					method: 'PATCH',
-					headers: { 'Content-Type': 'application/json' },
-					credentials: 'include',
-					body: JSON.stringify(updated),
-				}
-			);
-
-			if (!res.ok) {
-				throw new Error('Error updating card');
-			}
-
-			return res.json();
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['card', cardId] });
-		},
-	});
+	const cardData = data?.data.card;
 
 	const form = useForm({
 		defaultValues: {
-			word: cardData.word,
-			translation: cardData.translation,
-			imageUrl: cardData.imageUrl ?? '',
-			sentence: cardData.sentence ?? '',
+			word: cardData?.word ?? '',
+			translation: cardData?.translation ?? '',
+			imageUrl: cardData?.image ?? '',
+			sentence: cardData?.translation ?? '',
 		},
 		validators: {
 			onChange: CreateCardValidationSchema,
@@ -91,8 +42,8 @@ function EditCardContent() {
 			form.reset({
 				word: cardData.word,
 				translation: cardData.translation,
-				imageUrl: cardData.imageUrl ?? '',
-				sentence: cardData.sentence ?? '',
+				imageUrl: cardData.image ?? '',
+				sentence: cardData.translation ?? '',
 			});
 		}
 	}, [cardData, form]);

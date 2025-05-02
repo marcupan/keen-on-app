@@ -24,7 +24,7 @@ function EditCardContent() {
 		defaultValues: {
 			word: cardData?.word ?? '',
 			translation: cardData?.translation ?? '',
-			imageUrl: cardData?.image ?? '',
+			image: cardData?.image ?? '',
 			sentence: cardData?.translation ?? '',
 		},
 		validators: {
@@ -42,7 +42,7 @@ function EditCardContent() {
 			form.reset({
 				word: cardData.word,
 				translation: cardData.translation,
-				imageUrl: cardData.image ?? '',
+				image: cardData.image ?? '',
 				sentence: cardData.translation ?? '',
 			});
 		}
@@ -99,7 +99,7 @@ function EditCardContent() {
 			>
 				<TextInput name="word" label="Word" />
 				<TextInput name="translation" label="Translation" />
-				<TextInput name="imageUrl" type="file" label="Image URL" />
+				<TextInput name="image" type="file" label="Image URL" />
 				<TextInput name="sentence" label="Sentence" />
 
 				<form.Subscribe

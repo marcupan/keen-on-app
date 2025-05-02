@@ -66,7 +66,7 @@ function CreateCardContent() {
 		defaultValues: {
 			word: '',
 			translation: '',
-			imageUrl: '',
+			image: '',
 			sentence: '',
 		},
 		validators: {
@@ -119,7 +119,7 @@ function CreateCardContent() {
 			>
 				<TextInput label="Word" name="word" />
 				<TextInput label="Translation" name="translation" />
-				<TextInput label="Image URL" name="imageUrl" />
+				<TextInput label="Image URL" name="image" />
 				<TextInput label="Sentence" name="sentence" />
 
 				<form.Subscribe

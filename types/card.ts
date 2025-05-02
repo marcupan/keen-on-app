@@ -66,7 +66,7 @@ export type CardInputType<T> = {
 export type UpdateCardValues = {
 	word: string;
 	translation: string;
-	imageUrl: string;
+	image: string;
 	sentence: string;
 };
 

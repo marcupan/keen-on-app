@@ -8,13 +8,16 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 
 import {
+	CardResponse,
+	CreateCardValues,
 	GenerateCardResponse,
 	GenerateCardValues,
 	GeneratedData,
 } from '@/types/card';
 import { GenerateCardValidationSchema } from '@/validations/card';
-import ApiErrorValidationSchema from '@/validations/errors';
 import ProtectedPage from '@/components/ProtectedPage';
+import { Button } from '@/components/ui/Button';
+import { fetchApi } from '@/lib/api-client';
 
 function GenerateCardContent() {
 	const params = useParams();
@@ -29,8 +32,8 @@ function GenerateCardContent() {
 		GenerateCardValues
 	>({
 		mutationFn: async (values: GenerateCardValues) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards/generate`,
+			const result = await fetchApi<GenerateCardResponse>(
+				'/api/cards/generate',
 				{
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -40,33 +43,18 @@ function GenerateCardContent() {
 				}
 			);
 
-			if (!res.ok) {
-				let errorMessage = 'Error generating card';
-
-				try {
-					const errorData = await res.json();
-					const parsedError =
-						ApiErrorValidationSchema.parse(errorData);
-					errorMessage = parsedError.errors
-						.map((err) => err.message)
-						.join(', ');
-				} catch {
-					errorMessage = `Error: ${res.status} ${res.statusText}`;
-				}
-
-				throw new Error(errorMessage);
+			if (result === null) {
+				throw new Error('Card creation returned no content.');
 			}
 
-			return res.json();
+			return result;
 		},
-		onSuccess: (response) => {
-			const { data, status } = response;
-			console.log('Generated card data received:', data, status);
-
+		onSuccess: ({ data, status }) => {
 			if (status === 'success' && data) {
 				setGeneratedData(data);
 			} else {
 				setGeneratedData(null);
+
 				console.warn(
 					'Generation response status was not "success":',
 					status
@@ -75,57 +63,35 @@ function GenerateCardContent() {
 		},
 		onError: (error) => {
 			console.error('Generation mutation failed:', error);
+
 			setGeneratedData(null);
 		},
 	});
 
 	const createCardMutation = useMutation<
-		unknown,
+		CardResponse,
 		Error,
-		{
-			body: {
-				word: string;
-				translation: string;
-				image: string;
-				sentence: string;
-				folderId?: string;
-			};
-		}
+		CreateCardValues
 	>({
 		mutationFn: async (cardPayload) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards`,
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					credentials: 'include',
-					body: JSON.stringify(cardPayload.body),
-				}
-			);
+			const result = await fetchApi<CardResponse>('/api/cards', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify(cardPayload),
+			});
 
-			if (!res.ok) {
-				let errorMessage = 'Error creating card';
-
-				try {
-					const errorData = await res.json();
-					const parsedError =
-						ApiErrorValidationSchema.parse(errorData);
-					errorMessage = parsedError.errors
-						.map((err) => err.message)
-						.join(', ');
-				} catch {
-					errorMessage = `Error: ${res.status} ${res.statusText}`;
-				}
-
-				throw new Error(errorMessage);
+			if (result === null) {
+				throw new Error('Cards returned no content.');
 			}
 
-			return res.json();
+			return result;
 		},
 		onSuccess: (data) => {
 			console.log('Card created successfully', data);
 
 			setGeneratedData(null);
+
 			form.reset();
 		},
 		onError: (error) => {
@@ -143,6 +109,7 @@ function GenerateCardContent() {
 		},
 		onSubmit: async ({ value }) => {
 			setGeneratedData(null);
+
 			await generateMutation.mutateAsync(value);
 		},
 	});
@@ -270,13 +237,11 @@ function GenerateCardContent() {
 		}
 
 		const cardPayload = {
-			body: {
-				word: form.state.values.word,
-				translation: generatedData.translation,
-				image: generatedData.image,
-				sentence: generatedData.exampleSentences.join('\n'),
-				folderId: params.folderId,
-			},
+			word: form.state.values.word,
+			translation: generatedData.translation,
+			image: generatedData.image,
+			sentence: generatedData.exampleSentences.join('\n'),
+			folderId: params.folderId,
 		};
 
 		await createCardMutation.mutateAsync(cardPayload);
@@ -306,19 +271,22 @@ function GenerateCardContent() {
 						]}
 					>
 						{([canSubmit, isSubmitting]) => (
-							<button
+							<Button
 								type="submit"
+								isLoading={
+									generateMutation.isPending || isSubmitting
+								}
 								disabled={
 									!canSubmit ||
 									isSubmitting ||
 									generateMutation.isPending
 								}
-								className="w-full px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out"
+								className="w-full shadow hover:bg-blue-700 transition duration-150 ease-in-out"
 							>
 								{generateMutation.isPending
 									? 'Generating...'
 									: 'Generate Card Preview'}
-							</button>
+							</Button>
 						)}
 					</form.Subscribe>
 				</form>
@@ -405,7 +373,8 @@ function GenerateCardContent() {
 							</div>
 						</div>
 
-						<button
+						<Button
+							isLoading={createCardMutation.isPending}
 							disabled={
 								createCardMutation.isPending || !params.folderId
 							}
@@ -414,13 +383,13 @@ function GenerateCardContent() {
 									? 'Cannot create card without a folder context'
 									: ''
 							}
-							className="w-full px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out mt-4"
+							className="w-full bg-green-600 hover:bg-green-700 shadow transition duration-150 ease-in-out mt-4"
 							onClick={handleCreateCard}
 						>
 							{createCardMutation.isPending
 								? 'Saving...'
 								: 'Save Card to Folder'}
-						</button>
+						</Button>
 
 						{createCardMutation.isError && (
 							<p className="text-red-600 mt-3 text-sm">

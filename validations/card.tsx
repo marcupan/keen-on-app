@@ -8,6 +8,6 @@ export const GenerateCardValidationSchema = z.object({
 export const CreateCardValidationSchema = z.object({
 	word: z.string().min(1, 'Word is required'),
 	translation: z.string().min(1, 'Translation is required'),
-	imageUrl: z.string(),
+	image: z.string(),
 	sentence: z.string(),
 });

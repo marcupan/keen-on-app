@@ -11,6 +11,7 @@ import ProtectedPage from '@/components/ProtectedPage';
 
 function CreateFolderContent() {
 	const router = useRouter();
+
 	const mutation = useCreateFolder();
 
 	const handleSubmit = async (values: CreateFolderValues) => {

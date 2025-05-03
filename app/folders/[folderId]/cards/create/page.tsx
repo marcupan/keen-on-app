@@ -4,61 +4,24 @@ import React from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 
-import {
-	CardInputType,
-	CreateCardResponse,
-	CreateCardValues,
-} from '@/types/card';
+import { CardInputType, CreateCardValues } from '@/types/card';
 import { CreateCardValidationSchema } from '@/validations/card';
-import ApiErrorValidationSchema from '@/validations/errors';
 import ProtectedPage from '@/components/ProtectedPage';
 import FieldInfo from '@/components/ui/FieldInfo';
 import { FolderQueryProps } from '@/types/folder';
+import { useCreateCard } from '@/hooks/useCreateCard';
 
 function CreateCardContent() {
 	const { folderId } = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 
-	const queryClient = useQueryClient();
-
-	const mutation = useMutation<CreateCardResponse, Error, CreateCardValues>({
-		mutationFn: async (data: CreateCardValues) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/cards`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
-					body: JSON.stringify({ ...data, folderId }),
-				}
-			);
-
-			if (!res.ok) {
-				let errorMessage = 'Error creating card';
-
-				try {
-					const errorData = await res.json();
-					const parsedError =
-						ApiErrorValidationSchema.parse(errorData);
-
-					errorMessage = parsedError.errors
-						.map((err) => err.message)
-						.join(', ');
-				} catch {}
-
-				throw new Error(errorMessage);
-			}
-
-			return res.json();
-		},
+	const mutation = useCreateCard({
+		folderId,
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['cards', folderId] });
+			router.push(`/folders/${folderId}`);
 		},
 	});
 

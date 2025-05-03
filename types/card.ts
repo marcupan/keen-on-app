@@ -19,7 +19,7 @@ export type CardResponse = {
 	data: {
 		card: CardType;
 	};
-}
+};
 
 export type CardsResponseType = {
 	status: 'success' | 'error' | 'fail';

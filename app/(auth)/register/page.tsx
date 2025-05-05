@@ -1,18 +1,14 @@
-'use client';
-
 import * as React from 'react';
-
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
-
 import { z } from 'zod';
 
 import RegisterValidationSchema from '@/validations/register';
-import ApiErrorValidationSchema from '@/validations/errors';
 import FieldInfo from '@/components/ui/FieldInfo';
+import { Button } from '@/components/ui/Button';
+import { fetchApi } from '@/lib/api-client';
 
 type RegisterValues = z.infer<typeof RegisterValidationSchema>;
 
@@ -31,8 +27,8 @@ export default function RegisterForm() {
 
 	const mutation = useMutation<RegisterResponse, Error, RegisterValues>({
 		mutationFn: async (values) => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+			const result = await fetchApi<RegisterResponse>(
+				'/api/auth/register',
 				{
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -40,23 +36,11 @@ export default function RegisterForm() {
 				}
 			);
 
-			if (!res.ok) {
-				let errorMessage = 'Registration failed';
-
-				try {
-					const errorData = await res.json();
-					const parsedError =
-						ApiErrorValidationSchema.parse(errorData);
-
-					errorMessage = parsedError.errors
-						.map((err) => err.message)
-						.join(', ');
-				} catch {}
-
-				throw new Error(errorMessage);
+			if (result === null) {
+				throw new Error('Verification failed.');
 			}
 
-			return res.json();
+			return result;
 		},
 		onSuccess: () => {
 			router.push('/login');
@@ -74,8 +58,6 @@ export default function RegisterForm() {
 			onChange: RegisterValidationSchema,
 		},
 		onSubmit: async ({ value }) => {
-			console.log('value: ', value);
-
 			await mutation.mutateAsync(value);
 		},
 	});
@@ -95,7 +77,7 @@ export default function RegisterForm() {
 							id={field.name}
 							name={field.name}
 							type={type}
-							className="border p-2 w-full"
+							className="border p-2 w-full rounded"
 							value={field.state.value}
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
@@ -109,13 +91,14 @@ export default function RegisterForm() {
 
 	return (
 		<div className="max-w-md mx-auto">
-			<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
-				<h1 className="text-2xl mb-4">Register</h1>
+			<div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-lg">
+				<h1 className="text-2xl font-semibold mb-6 text-center">
+					Register
+				</h1>
 				<form
 					onSubmit={(ev) => {
 						ev.preventDefault();
 						ev.stopPropagation();
-
 						form.handleSubmit();
 					}}
 				>
@@ -139,26 +122,31 @@ export default function RegisterForm() {
 						]}
 					>
 						{([canSubmit, isSubmitting]) => (
-							<button
+							<Button
 								type="submit"
 								disabled={!canSubmit || isSubmitting}
-								className="mt-4 px-4 py-2 bg-blue-600 text-white"
+								isLoading={isSubmitting}
+								className="w-full mt-4"
+								variant="primary"
 							>
 								{isSubmitting ? 'Registering...' : 'Register'}
-							</button>
+							</Button>
 						)}
 					</form.Subscribe>
 				</form>
 
 				{mutation.isError && (
-					<p className="text-red-500 mt-2">
+					<p className="text-red-500 mt-4 text-sm text-center">
 						{(mutation.error as Error).message}
 					</p>
 				)}
 			</div>
 
-			<p className="mt-10 text-center text-blue-500">
-				<Link href="/register">Register</Link>
+			<p className="mt-6 text-center text-sm">
+				Already have an account?{' '}
+				<Link href="/login" className="text-blue-600 hover:underline">
+					Login
+				</Link>
 			</p>
 		</div>
 	);

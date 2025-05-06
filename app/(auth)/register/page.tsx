@@ -1,8 +1,11 @@
 import * as React from 'react';
+
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+
 import { z } from 'zod';
 
 import RegisterValidationSchema from '@/validations/register';
@@ -37,7 +40,7 @@ export default function RegisterForm() {
 			);
 
 			if (result === null) {
-				throw new Error('Verification failed.');
+				throw new Error('Registration failed.');
 			}
 
 			return result;

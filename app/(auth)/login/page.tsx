@@ -9,11 +9,12 @@ import { useForm } from '@tanstack/react-form';
 
 import { z } from 'zod';
 
-import ApiErrorValidationSchema from '@/validations/errors';
 import LoginValidationSchema from '@/validations/login';
 import FieldInfo from '@/components/ui/FieldInfo';
 import { useAuth } from '@/lib/auth';
 import { User } from '@/lib/types';
+import { Button } from '@/components/ui/Button';
+import { fetchApi } from '@/lib/api-client';
 
 type LoginValues = z.infer<typeof LoginValidationSchema>;
 
@@ -32,30 +33,17 @@ export default function LoginForm() {
 
 	const mutation = useMutation<LoginResponse, Error, LoginValues>({
 		mutationFn: async (values: LoginValues) => {
-			const res = await fetch('/api/auth/login', {
+			const result = await fetchApi<LoginResponse>('/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(values),
 			});
 
-			if (!res.ok) {
-				let errorMessage = 'Login failed';
-
-				try {
-					const errorData = await res.json();
-
-					const parsedError =
-						ApiErrorValidationSchema.parse(errorData);
-
-					errorMessage = parsedError.errors
-						.map((err) => err.message)
-						.join(', ');
-				} catch {}
-
-				throw new Error(errorMessage);
+			if (result === null) {
+				throw new Error('Login failed. Please check your credentials.');
 			}
 
-			return res.json();
+			return result;
 		},
 		onSuccess: (data) => {
 			login(data.user);
@@ -91,7 +79,7 @@ export default function LoginForm() {
 							name={field.name}
 							type={type}
 							value={field.state.value}
-							className="border p-2 w-full"
+							className="border p-2 w-full rounded"
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
 						/>
@@ -104,13 +92,14 @@ export default function LoginForm() {
 
 	return (
 		<div className="max-w-md mx-auto">
-			<div className="max-w-md mx-auto mt-10 p-4 bg-white shadow">
-				<h1 className="text-2xl mb-4">Login</h1>
+			<div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-lg">
+				<h1 className="text-2xl font-semibold mb-6 text-center">
+					Login
+				</h1>
 				<form
 					onSubmit={(ev) => {
 						ev.preventDefault();
 						ev.stopPropagation();
-
 						form.handleSubmit();
 					}}
 				>
@@ -128,26 +117,33 @@ export default function LoginForm() {
 						]}
 					>
 						{([canSubmit, isSubmitting]) => (
-							<button
+							<Button
 								type="submit"
 								disabled={!canSubmit || isSubmitting}
-								className="mt-4 px-4 py-2 bg-blue-600 text-white"
+								isLoading={isSubmitting}
+								className="w-full mt-4"
+								variant="primary"
 							>
 								{isSubmitting ? 'Logging in...' : 'Login'}
-							</button>
+							</Button>
 						)}
 					</form.Subscribe>
 				</form>
 
 				{mutation.isError && (
-					<p className="text-red-500 mt-2">
+					<p className="text-red-500 mt-4 text-sm text-center">
 						{(mutation.error as Error).message}
 					</p>
 				)}
 			</div>
 
-			<p className="mt-10 text-center text-blue-500">
-				<Link href="/register">Register</Link>
+			<p className="mt-6 text-center text-sm">
+				<Link
+					href="/register"
+					className="text-blue-600 hover:underline"
+				>
+					Register
+				</Link>
 			</p>
 		</div>
 	);

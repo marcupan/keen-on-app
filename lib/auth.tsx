@@ -6,57 +6,79 @@ import React, {
 	ReactNode,
 } from 'react';
 
-import { User } from './types';
+import { UserProfile, UserResponseType } from '@/types/user';
+import { ApiError, fetchApi } from '@/lib/api-client';
 
-interface AuthContextType {
-	user: User | null;
+export interface AuthContextType {
+	user: UserProfile | null;
 	isAuthenticated: boolean;
 	isLoading: boolean;
-	login: (user: User) => void;
-	logout: () => void;
+	login: (user: UserProfile) => void;
+	logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [user, setUser] = useState<User | null>(null);
-
+	const [user, setUser] = useState<UserProfile | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		async function fetchUser() {
+		async function fetchCurrentSessionUser() {
 			try {
 				setIsLoading(true);
-				const res = await fetch('/api/auth/me', {
-					credentials: 'include',
-				});
 
-				if (!res.ok) {
-					setUser(null);
+				const response =
+					await fetchApi<UserResponseType>('/api/auth/me');
+
+				if (
+					response &&
+					response.status === 'success' &&
+					response.data &&
+					response.data.user
+				) {
+					setUser(response.data.user);
 				} else {
-					const data = await res.json();
+					setUser(null);
 
-					setUser(data.user);
+					if (response) {
+						console.warn(
+							'/api/auth/me response was not successful or data was malformed:',
+							response
+						);
+					}
 				}
-			} catch {
+			} catch (error) {
+				if (error instanceof ApiError) {
+					console.error('API Error fetching user:', error.errors);
+				} else {
+					console.error('Failed to fetch user:', error);
+				}
 				setUser(null);
 			} finally {
 				setIsLoading(false);
 			}
 		}
 
-		fetchUser();
+		fetchCurrentSessionUser();
 	}, []);
 
-	const login = (user: User) => {
-		setUser(user);
+	const login = (loggedInUser: UserProfile) => {
+		setUser(loggedInUser);
 	};
 
-	const logout = () => {
-		fetch('/api/auth/logout', {
-			method: 'POST',
-			credentials: 'include',
-		}).finally(() => setUser(null));
+	const logout = async () => {
+		try {
+			await fetchApi('/api/auth/logout', { method: 'POST' });
+		} catch (error) {
+			if (error instanceof ApiError) {
+				console.error('API Error during logout:', error.errors);
+			} else {
+				console.error('Logout API call failed:', error);
+			}
+		} finally {
+			setUser(null);
+		}
 	};
 
 	const isAuthenticated = !!user;

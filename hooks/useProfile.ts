@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchApi } from '@/lib/api-client';
-import type { UserProfile, UserResponseType } from '@/types/user';
+import type { UserType, UserResponseType } from '@/types/user';
 import { useAuth } from '@/lib/auth';
 
 export function useProfile() {
 	const { isAuthenticated } = useAuth();
 
-	return useQuery<{ data: { user: UserProfile } }>({
+	return useQuery<{ data: { user: UserType } }>({
 		queryKey: ['profile'],
 		queryFn: async () => {
 			const result = await fetchApi<UserResponseType | null>(

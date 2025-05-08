@@ -6,21 +6,14 @@ import React, {
 	ReactNode,
 } from 'react';
 
-import { UserProfile, UserResponseType } from '@/types/user';
+import { UserType, UserResponseType } from '@/types/user';
 import { ApiError, fetchApi } from '@/lib/api-client';
-
-export interface AuthContextType {
-	user: UserProfile | null;
-	isAuthenticated: boolean;
-	isLoading: boolean;
-	login: (user: UserProfile) => void;
-	logout: () => Promise<void>;
-}
+import { AuthContextType } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [user, setUser] = useState<UserProfile | null>(null);
+	const [user, setUser] = useState<UserType | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -63,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		fetchCurrentSessionUser();
 	}, []);
 
-	const login = (loggedInUser: UserProfile) => {
+	const login = (loggedInUser: UserType) => {
 		setUser(loggedInUser);
 	};
 

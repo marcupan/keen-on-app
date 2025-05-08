@@ -12,14 +12,14 @@ import { z } from 'zod';
 import LoginValidationSchema from '@/validations/login';
 import FieldInfo from '@/components/ui/FieldInfo';
 import { useAuth } from '@/lib/auth';
-import { User } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { fetchApi } from '@/lib/api-client';
+import { UserType } from '@/types/user';
 
 type LoginValues = z.infer<typeof LoginValidationSchema>;
 
 type LoginResponse = {
-	user: User;
+	user: UserType;
 };
 
 type FormFieldsType = {

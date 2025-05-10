@@ -6,11 +6,12 @@ const nextConfig: NextConfig = {
 		NEXT_PUBLIC_API_URL:
 			process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
 	},
-	async rewrites() {
+	async redirects() {
 		return [
 			{
-				source: '/api/:path*',
-				destination: 'http://localhost:4000/api/:path*',
+				source: '/',
+				destination: '/dashboard',
+				permanent: true,
 			},
 		];
 	},

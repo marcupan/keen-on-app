@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CreateCardResponse, CreateCardValues } from '@/types/card';
-import { fetchApi } from '@/lib/api-client'; // Assuming fetchApi handles base URL and credentials
+import { fetchApi } from '@/lib/api-client';
 
 interface UseCreateCardOptions {
 	folderId: string;

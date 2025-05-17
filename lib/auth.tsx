@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				setIsLoading(true);
 
 				const response =
-					await fetchApi<UserResponseType>('/api/auth/me');
+					await fetchApi<UserResponseType>('/api/user/profile');
 
 				if (
 					response &&
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 					if (response) {
 						console.warn(
-							'/api/auth/me response was not successful or data was malformed:',
+							'/api/user/profile response was not successful or data was malformed:',
 							response
 						);
 					}

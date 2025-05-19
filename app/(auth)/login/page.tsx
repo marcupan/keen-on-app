@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
@@ -29,6 +30,8 @@ type FormFieldsType = {
 };
 
 export default function LoginForm() {
+	const router = useRouter();
+
 	const { login } = useAuth();
 
 	const mutation = useMutation<LoginResponse, Error, LoginValues>({
@@ -47,6 +50,8 @@ export default function LoginForm() {
 		},
 		onSuccess: (data) => {
 			login(data.user);
+
+			router.push('/dashboard');
 		},
 	});
 

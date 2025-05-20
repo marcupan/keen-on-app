@@ -10,6 +10,7 @@ import { CardInputType, CardQueryParams, UpdateCardValues } from '@/types/card';
 import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
 import { useCard } from '@/hooks/useCard';
+import TextInput from '@/components/ui/TextInput';
 
 function EditCardContent() {
 	const { folderId, cardId } = useParams<CardQueryParams>();
@@ -48,7 +49,7 @@ function EditCardContent() {
 		}
 	}, [cardData, form]);
 
-	function TextInput({
+	function InputField({
 		name,
 		label,
 		type = 'text',
@@ -56,23 +57,14 @@ function EditCardContent() {
 		return (
 			<form.Field name={name}>
 				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type={type}
-							value={field.state.value}
-							className="border p-2 w-full"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-					</div>
+					<TextInput
+						label={label}
+						name={field.name}
+						type={type}
+						value={field.state.value}
+						onChange={field.handleChange}
+						onBlur={field.handleBlur}
+					/>
 				)}
 			</form.Field>
 		);
@@ -97,10 +89,10 @@ function EditCardContent() {
 					form.handleSubmit();
 				}}
 			>
-				<TextInput name="word" label="Word" />
-				<TextInput name="translation" label="Translation" />
-				<TextInput name="image" type="file" label="Image URL" />
-				<TextInput name="sentence" label="Sentence" />
+				<InputField name="word" label="Word" />
+				<InputField name="translation" label="Translation" />
+				<InputField name="image" type="file" label="Image URL" />
+				<InputField name="sentence" label="Sentence" />
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}

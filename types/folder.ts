@@ -7,7 +7,7 @@ export type FolderQueryProps = {
 };
 
 export type FolderType = {
-	id: string;
+	id?: string;
 	name: string;
 	description?: string;
 };

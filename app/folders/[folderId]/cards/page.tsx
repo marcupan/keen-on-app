@@ -10,11 +10,16 @@ import { FolderQueryProps } from '@/types/folder';
 import { CardType } from '@/types/card';
 
 function CardsContent() {
-	const params = useParams<FolderQueryProps>();
+	const { folderId } = useParams<FolderQueryProps>();
 
 	const router = useRouter();
 
-	const { data, isLoading, error } = useCards(params.folderId);
+	const { data, isLoading, error } = useCards({
+		folderId,
+		take: 20,
+		sort: 'createdAt',
+		order: 'DESC'
+	});
 
 	const cards: CardType[] = data?.data?.cards ?? [];
 
@@ -28,7 +33,7 @@ function CardsContent() {
 					className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-150"
 					onClick={() =>
 						router.push(
-							`/folders/${params.folderId}/cards/generate`
+							`/folders/${folderId}/cards/generate`
 						)
 					}
 				>
@@ -53,7 +58,7 @@ function CardsContent() {
 								className="p-4 bg-white shadow rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
 								onClick={() =>
 									router.push(
-										`/folders/${params.folderId}/cards/${card.id}`
+										`/folders/${folderId}/cards/${card.id}`
 									)
 								}
 							>

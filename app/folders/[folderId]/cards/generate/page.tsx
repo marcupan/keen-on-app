@@ -123,40 +123,48 @@ function GenerateCardContent() {
 	}) {
 		return (
 			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type="text"
-							value={field.state.value}
-							aria-invalid={field.state.meta.errors.length > 0}
-							aria-describedby={
-								field.state.meta.errors.length > 0
-									? `${field.name}-errors`
-									: undefined
-							}
-							className="border p-2 w-full rounded shadow-sm"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-
-						{field.state.meta.errors.length > 0 && (
-							<div
-								id={`${field.name}-errors`}
-								className="text-red-600 text-sm mt-1"
+				{(field) => {
+					return (
+						<div className="mb-4">
+							<label
+								htmlFor={field.name}
+								className="block text-sm font-medium mb-1"
 							>
-								{field.state.meta.errors.join(', ')}
-							</div>
-						)}
-					</div>
-				)}
+								{label}
+							</label>
+							<input
+								id={field.name}
+								name={field.name}
+								type="text"
+								value={field.state.value}
+								aria-invalid={
+									field.state.meta.errors.length > 0
+								}
+								aria-describedby={
+									field.state.meta.errors.length > 0
+										? `${field.name}-errors`
+										: undefined
+								}
+								className="border p-2 w-full rounded shadow-sm"
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+							/>
+
+							{field.state.meta.errors.length > 0 && (
+								<div
+									id={`${field.name}-errors`}
+									className="text-red-600 text-sm mt-1"
+								>
+									{field.state.meta.errors
+										.map((el) => el && el.message)
+										.join(', ')}
+								</div>
+							)}
+						</div>
+					);
+				}}
 			</form.Field>
 		);
 	}

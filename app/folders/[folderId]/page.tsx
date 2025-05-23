@@ -9,8 +9,8 @@ import { useForm } from '@tanstack/react-form';
 import CreateFolderValidationSchema from '@/validations/folder';
 import { FolderQueryProps } from '@/types/folder';
 import ProtectedPage from '@/components/ProtectedPage';
-import TextInput from '@/components/ui/TextInput';
 import { useFolder } from '@/hooks/useFolder';
+import { FormInput } from '@/components/ui/FormInput';
 
 function FolderDetailsContent() {
 	const { folderId } = useParams<FolderQueryProps>();
@@ -53,6 +53,34 @@ function FolderDetailsContent() {
 		return <p className="text-red-500">Error loading folder.</p>;
 	}
 
+	const TextInput = ({
+		label,
+		name,
+	}: {
+		label: string;
+		name: 'name' | 'description';
+	}) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type="text"
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
+
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">
 			<h1 className="text-xl mb-4">Edit Folder</h1>
@@ -63,29 +91,9 @@ function FolderDetailsContent() {
 					form.handleSubmit();
 				}}
 			>
-				<form.Field name="name">
-					{(field) => (
-						<TextInput
-							label="Folder Name"
-							name={field.name}
-							value={field.state.value}
-							onChange={field.handleChange}
-							onBlur={field.handleBlur}
-						/>
-					)}
-				</form.Field>
-
-				<form.Field name="description">
-					{(field) => (
-						<TextInput
-							label="Description"
-							name={field.name}
-							value={field.state.value || ''}
-							onChange={field.handleChange}
-							onBlur={field.handleBlur}
-						/>
-					)}
-				</form.Field>
+				<TextInput name="description" label="Folder Name" />
+				
+				<TextInput name="name" label="Description" />
 
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}

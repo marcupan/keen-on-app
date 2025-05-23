@@ -18,6 +18,7 @@ import { GenerateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
 import { Button } from '@/components/ui/Button';
 import { fetchApi } from '@/lib/api-client';
+import { FormInput } from '@/components/ui/FormInput';
 
 function GenerateCardContent() {
 	const params = useParams();
@@ -114,126 +115,62 @@ function GenerateCardContent() {
 		},
 	});
 
-	function TextInput({
+	const TextInput = ({
 		label,
 		name,
 	}: {
 		label: string;
 		name: keyof GenerateCardValues;
-	}) {
-		return (
-			<form.Field name={name}>
-				{(field) => {
-					return (
-						<div className="mb-4">
-							<label
-								htmlFor={field.name}
-								className="block text-sm font-medium mb-1"
-							>
-								{label}
-							</label>
-							<input
-								id={field.name}
-								name={field.name}
-								type="text"
-								value={field.state.value}
-								aria-invalid={
-									field.state.meta.errors.length > 0
-								}
-								aria-describedby={
-									field.state.meta.errors.length > 0
-										? `${field.name}-errors`
-										: undefined
-								}
-								className="border p-2 w-full rounded shadow-sm"
-								onBlur={field.handleBlur}
-								onChange={(e) =>
-									field.handleChange(e.target.value)
-								}
-							/>
-
-							{field.state.meta.errors.length > 0 && (
-								<div
-									id={`${field.name}-errors`}
-									className="text-red-600 text-sm mt-1"
-								>
-									{field.state.meta.errors
-										.map((el) => el && el.message)
-										.join(', ')}
-								</div>
-							)}
-						</div>
-					);
-				}}
-			</form.Field>
-		);
-	}
-
-	function FileInput({
-		label,
-		name,
-	}: {
-		label: string;
-		name: keyof GenerateCardValues;
-	}) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							type="file"
-							accept="image/png, image/jpeg, image/webp"
-							aria-invalid={field.state.meta.errors.length > 0}
-							aria-describedby={
-								field.state.meta.errors.length > 0
-									? `${field.name}-errors`
-									: undefined
-							}
-							className="border p-2 w-full rounded shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-							onBlur={field.handleBlur}
-							onChange={(ev) => {
-								const file = ev.target.files?.[0];
-
-								if (file) {
-									const reader = new FileReader();
-
-									reader.onloadend = () => {
-										const result = reader.result as string;
-
-										field.handleChange(result);
-									};
-
-									reader.onerror = () => {
-										console.error('Error reading file');
-										field.handleChange('');
-									};
-
-									reader.readAsDataURL(file);
-								} else {
-									field.handleChange('');
-								}
-							}}
-						/>
-						{field.state.meta.errors.length > 0 && (
-							<div
-								id={`${field.name}-errors`}
-								className="text-red-600 text-sm mt-1"
-							>
-								{field.state.meta.errors.join(', ')}
-							</div>
+	}) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type="text"
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
 						)}
-					</div>
-				)}
-			</form.Field>
-		);
-	}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
+
+	const FileInput = ({
+		label,
+		name,
+	}: {
+		label: string;
+		name: keyof GenerateCardValues;
+	}) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					value={field.state.value}
+					type="file"
+					accept="image/png, image/jpeg, image/webp"
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
 
 	const handleCreateCard = async () => {
 		if (!generatedData || typeof params.folderId !== 'string') {

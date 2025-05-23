@@ -1,8 +1,9 @@
 import { useForm } from '@tanstack/react-form';
 
 import CreateFolderValidationSchema from '@/validations/folder';
-import FieldInfo from '@/components/ui/FieldInfo';
 import { CreateFolderValues } from '@/types/folder';
+import { FormInput } from '@/components/ui/FormInput';
+import React from 'react';
 
 type CreateFolderFormProps = {
 	onSubmit: (values: CreateFolderValues) => Promise<void>;
@@ -31,32 +32,27 @@ export function CreateFolderForm({
 		},
 	});
 
-	function FormField({ name, label }: FormFieldProps) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type="text"
-							value={field.state.value}
-							className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-						<FieldInfo field={field} />
-					</div>
-				)}
-			</form.Field>
-		);
-	}
+	const TextInput = ({ name, label }: FormFieldProps) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type="text"
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
 
 	return (
 		<form
@@ -66,8 +62,8 @@ export function CreateFolderForm({
 				form.handleSubmit();
 			}}
 		>
-			<FormField label="Folder Name" name="name" />
-			<FormField label="Description" name="description" />
+			<TextInput label="Folder Name" name="name" />
+			<TextInput label="Description" name="description" />
 
 			<form.Subscribe selector={(state) => [state.canSubmit]}>
 				{([canSubmit]) => (

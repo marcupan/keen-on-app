@@ -9,9 +9,9 @@ import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import RegisterValidationSchema from '@/validations/register';
-import FieldInfo from '@/components/ui/FieldInfo';
 import { Button } from '@/components/ui/Button';
 import { fetchApi } from '@/lib/api-client';
+import { FormInput } from '@/components/ui/FormInput';
 
 type RegisterValues = z.infer<typeof RegisterValidationSchema>;
 
@@ -65,32 +65,27 @@ export default function RegisterForm() {
 		},
 	});
 
-	function TextInput({ name, label, type = 'text' }: RegisterInputType) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type={type}
-							className="border p-2 w-full rounded"
-							value={field.state.value}
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-						<FieldInfo field={field} />
-					</div>
-				)}
-			</form.Field>
-		);
-	}
+	const TextInput = ({ name, label, type = 'text' }: RegisterInputType) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type={type}
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
 
 	return (
 		<div className="max-w-md mx-auto">

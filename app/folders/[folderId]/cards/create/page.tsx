@@ -9,9 +9,9 @@ import { useForm } from '@tanstack/react-form';
 import { CardInputType, CreateCardValues } from '@/types/card';
 import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
-import FieldInfo from '@/components/ui/FieldInfo';
 import { FolderQueryProps } from '@/types/folder';
 import { useCreateCard } from '@/hooks/useCreateCard';
+import { FormInput } from '@/components/ui/FormInput';
 
 function CreateCardContent() {
 	const { folderId } = useParams<FolderQueryProps>();
@@ -42,32 +42,27 @@ function CreateCardContent() {
 		},
 	});
 
-	function TextInput({ name, label }: CardInputType<CreateCardValues>) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<div className="mb-4">
-						<label
-							htmlFor={field.name}
-							className="block text-sm font-medium mb-1"
-						>
-							{label}
-						</label>
-						<input
-							id={field.name}
-							name={field.name}
-							type="text"
-							value={field.state.value}
-							className="border p-2 w-full"
-							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.value)}
-						/>
-						<FieldInfo field={field} />
-					</div>
-				)}
-			</form.Field>
-		);
-	}
+	const TextInput = ({ name, label }: CardInputType<CreateCardValues>) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type="text"
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">

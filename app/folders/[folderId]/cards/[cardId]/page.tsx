@@ -11,13 +11,17 @@ import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
 import { useCard } from '@/hooks/useCard';
 import TextInput from '@/components/ui/TextInput';
+import { FormInput } from '@/components/ui/FormInput';
 
 function EditCardContent() {
 	const { folderId, cardId } = useParams<CardQueryParams>();
 
 	const router = useRouter();
 
-	const { query: { data, isLoading, error }, mutation } = useCard(cardId);
+	const {
+		query: { data, isLoading, error },
+		mutation,
+	} = useCard(cardId);
 
 	const cardData = data?.data.card;
 
@@ -49,27 +53,6 @@ function EditCardContent() {
 		}
 	}, [cardData, form]);
 
-	function InputField({
-		name,
-		label,
-		type = 'text',
-	}: CardInputType<UpdateCardValues>) {
-		return (
-			<form.Field name={name}>
-				{(field) => (
-					<TextInput
-						label={label}
-						name={field.name}
-						type={type}
-						value={field.state.value}
-						onChange={field.handleChange}
-						onBlur={field.handleBlur}
-					/>
-				)}
-			</form.Field>
-		);
-	}
-
 	if (isLoading) {
 		return <p>Loading card...</p>;
 	}
@@ -77,6 +60,32 @@ function EditCardContent() {
 	if (error) {
 		return <p className="text-red-500">Error loading card.</p>;
 	}
+
+	const InputField = ({
+		name,
+		label,
+		type = 'text',
+	}: CardInputType<UpdateCardValues>) => (
+		<form.Field name={name}>
+			{(field) => (
+				<FormInput
+					id={field.name}
+					label={label}
+					name={field.name}
+					type={type}
+					value={field.state.value}
+					error={field.state.meta.errors
+						.map((err) => err?.message)
+						.filter(
+							(message): message is string =>
+								message !== undefined
+						)}
+					onChange={field.handleChange}
+					onBlur={field.handleBlur}
+				/>
+			)}
+		</form.Field>
+	);
 
 	return (
 		<div className="max-w-md mx-auto p-4 bg-white shadow">

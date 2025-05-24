@@ -10,8 +10,8 @@ import { CardInputType, CardQueryParams, UpdateCardValues } from '@/types/card';
 import { CreateCardValidationSchema } from '@/validations/card';
 import ProtectedPage from '@/components/ProtectedPage';
 import { useCard } from '@/hooks/useCard';
-import TextInput from '@/components/ui/TextInput';
 import { FormInput } from '@/components/ui/FormInput';
+import { AsyncStateWrapper } from '@/components/ui/AsyncStateWrapper';
 
 function EditCardContent() {
 	const { folderId, cardId } = useParams<CardQueryParams>();
@@ -53,14 +53,6 @@ function EditCardContent() {
 		}
 	}, [cardData, form]);
 
-	if (isLoading) {
-		return <p>Loading card...</p>;
-	}
-
-	if (error) {
-		return <p className="text-red-500">Error loading card.</p>;
-	}
-
 	const InputField = ({
 		name,
 		label,
@@ -88,36 +80,45 @@ function EditCardContent() {
 	);
 
 	return (
-		<div className="max-w-md mx-auto p-4 bg-white shadow">
-			<h1 className="text-xl mb-4">Edit Card</h1>
-			<form
-				onSubmit={(ev) => {
-					ev.preventDefault();
-					ev.stopPropagation();
+		<AsyncStateWrapper
+			isLoading={isLoading}
+			error={error}
+			loadingMessage="Loading card..."
+		>
+			<div className="max-w-md mx-auto p-4 bg-white shadow">
+				<h1 className="text-xl mb-4">Edit Card</h1>
+				<form
+					onSubmit={(ev) => {
+						ev.preventDefault();
+						ev.stopPropagation();
 
-					form.handleSubmit();
-				}}
-			>
-				<InputField name="word" label="Word" />
-				<InputField name="translation" label="Translation" />
-				<InputField name="image" type="file" label="Image URL" />
-				<InputField name="sentence" label="Sentence" />
-
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
+						form.handleSubmit();
+					}}
 				>
-					{([canSubmit, isSubmitting]) => (
-						<button
-							type="submit"
-							disabled={!canSubmit || isSubmitting}
-							className="px-4 py-2 bg-blue-600 text-white"
-						>
-							{isSubmitting ? 'Saving...' : 'Save'}
-						</button>
-					)}
-				</form.Subscribe>
-			</form>
-		</div>
+					<InputField name="word" label="Word" />
+					<InputField name="translation" label="Translation" />
+					<InputField name="image" type="file" label="Image URL" />
+					<InputField name="sentence" label="Sentence" />
+
+					<form.Subscribe
+						selector={(state) => [
+							state.canSubmit,
+							state.isSubmitting,
+						]}
+					>
+						{([canSubmit, isSubmitting]) => (
+							<button
+								type="submit"
+								disabled={!canSubmit || isSubmitting}
+								className="px-4 py-2 bg-blue-600 text-white"
+							>
+								{isSubmitting ? 'Saving...' : 'Save'}
+							</button>
+						)}
+					</form.Subscribe>
+				</form>
+			</div>
+		</AsyncStateWrapper>
 	);
 }
 

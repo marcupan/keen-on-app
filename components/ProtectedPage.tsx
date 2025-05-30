@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
 import { useAuth } from '@/lib/auth';
 
 type ProtectedPageProps = {
-	children: React.ReactNode;
+	children: ReactNode;
 };
 
 export default function ProtectedPage({ children }: ProtectedPageProps) {

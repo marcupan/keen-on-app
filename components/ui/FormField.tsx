@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 type FieldErrorProps = {
 	id: string;
@@ -13,7 +13,7 @@ export const FieldError = ({ id, errors }: FieldErrorProps) => (
 
 type FormLabelProps = {
 	htmlFor: string;
-	children: React.ReactNode;
+	children: ReactNode;
 };
 
 export const FormLabel = ({ htmlFor, children }: FormLabelProps) => (

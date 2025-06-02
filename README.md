@@ -4,7 +4,7 @@
 
 ## Overview
 
-This frontend provides a **user-friendly interface** to generate and manage Chinese learning cards. It connects to the **backend API (Node.js)**, which orchestrates:
+This frontend provides a **user-friendly interface** for generating and managing Chinese learning cards. It connects to the **backend API (Node.js)**, which orchestrates:
 - **Translation Service (Python)** – Generates translations.
 - **Image Composition Service (Rust)** – Creates visuals.
 

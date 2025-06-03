@@ -1,6 +1,6 @@
 # KeenOn Card Generate – Frontend
 
-**KeenOn Card Generate** is a **study project** exploring microservice architecture, with a **Next.js frontend** for interacting with the backend services.
+**KeenOn Card Generate** is a **study project** that explores microservice architecture, featuring a **Next.js frontend** for interacting with the backend services.
 
 ## Overview
 

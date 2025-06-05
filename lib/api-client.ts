@@ -194,7 +194,7 @@ export async function fetchApi<T>(
 
 		// Return parsed JSON for successful responses (2xx).
 		// We cast to T, relying on the caller to provide the correct type.
-		return await response.json() as Promise<T>;
+		return (await response.json()) as Promise<T>;
 	} catch (error) {
 		// Re-throw ApiError instances directly.
 		if (error instanceof ApiError) {
